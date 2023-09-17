@@ -20,6 +20,7 @@ let currentInput = "";
 // a 2D list of GuessCharObj objects.
 // type GuessCharObj = {character: string, color: Color};
 let guessCharHistory = [];
+let guessStringHistory = [];
 
 function createInputKeyPressCallback(char) {
   return () => {
@@ -46,19 +47,29 @@ function handleEnterEvent() {
   updateUI();
 }
 
+function showTooltip(string) {
+  console.log(string);
+}
+
 function attemptSubmit() {
+  // has the word been guessed before
+  if (guessStringHistory.includes(currentInput)) {
+    showTooltip("Guessed before");
+    return;
+  }
   // are there 5 letters
   if (currentInput.length !== 5) {
-    console.log("Not enough letters");
+    showTooltip("Not enough letters");
     return;
   }
   // is the word legal?
   if (!LEGAL_WORDS.includes(currentInput)) {
-    console.log("Not a word");
+    showTooltip("Not a word");
     return;
   }
   const row = convertInputToGuess();
   guessCharHistory.push(row);
+  guessStringHistory.push(currentInput);
   for (const obj of row) {
     updateKeyboardKeyState(obj);
   }
@@ -80,6 +91,7 @@ function updateKeyboardKeyState(obj) {
 
 function addLetterToInput(char) {
   if (currentInput.length >= 5) return;
+  if (guessCharHistory.length >= 6) return;
   currentInput += char;
 }
 

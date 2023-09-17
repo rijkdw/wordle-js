@@ -53,6 +53,9 @@ p {
   height: 100%;
   aspect-ratio: 1;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tile.inputted {
@@ -72,6 +75,53 @@ p {
 .tile.green {
   background-color: var(--green);
   border-color: var(--green);
+}
+
+.shaking {
+  animation-name: shaking;
+  animation-duration: 400ms;
+}
+
+@keyframes shaking {
+  from {
+    transform: translate(0);
+  }
+
+  20% {
+    transform: translate(1rem);
+  }
+
+  40% {
+    transform: translate(-1rem);
+  }
+
+  60% {
+    transform: translate(1rem);
+  }
+
+  80% {
+    transform: translate(-1rem);
+  }
+
+  to {
+    transform: translate(0);
+  }
+}
+
+.flip {
+  animation-name: flip;
+  animation-timing-function: ease-in;
+  animation-duration: 300ms;
+}
+
+@keyframes flip {
+  from {
+    transform: scaleY(1);
+  }
+
+  to {
+    transform: scaleY(0);
+  }
 }
 
 /* Tile contents */

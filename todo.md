@@ -10,4 +10,4 @@
     - correct input flipping
 - tooltips
     - show word after six guesses
-- limit number of guesses to 6
+    - already guessed
