@@ -13,6 +13,7 @@
   --lgrey: #7f8182;
   /* Durations */
   --shake-duration: 500ms;
+  --inputting-duration: 100ms;
 }
 
 * {
@@ -127,6 +128,26 @@ p {
 
   to {
     transform: scaleY(0);
+  }
+}
+
+.inputting {
+  animation-name: inputting;
+  animation-duration: var(--inputting-duration);
+  animation-timing-function: linear;
+}
+
+@keyframes inputting {
+  from {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(0.9);
+  }
+
+  to {
+    transform: scale(1);
   }
 }
 

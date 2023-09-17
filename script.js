@@ -24,9 +24,14 @@ let guessStringHistory = [];
 
 function createInputKeyPressCallback(char) {
   return () => {
-    addLetterToInput(char);
-    updateUI();
+    handleInput(char);
   };
+}
+
+function handleInput(char) {
+  addLetterToInput(char);
+  triggerInputtingAnimation();
+  updateUI();
 }
 
 function createBackspaceKeyPressCallback() {
@@ -34,6 +39,7 @@ function createBackspaceKeyPressCallback() {
 }
 
 function handleBackspaceEvent() {
+  isInputting = false;
   currentInput = currentInput.substring(0, currentInput.length - 1);
   updateUI();
 }
@@ -43,6 +49,7 @@ function createEnterKeyPressCallback() {
 }
 
 function handleEnterEvent() {
+  isInputting = false;
   attemptSubmit();
   updateUI();
 }
@@ -55,19 +62,19 @@ function attemptSubmit() {
   // has the word been guessed before
   if (guessStringHistory.includes(currentInput)) {
     showTooltip("Guessed before");
-    shake();
+    triggerShakeAnimation();
     return;
   }
   // are there 5 letters
   if (currentInput.length !== 5) {
     showTooltip("Not enough letters");
-    shake();
+    triggerShakeAnimation();
     return;
   }
   // is the word legal?
   if (!LEGAL_WORDS.includes(currentInput)) {
     showTooltip("Not a word");
-    shake();
+    triggerShakeAnimation();
     return;
   }
   const row = convertInputToGuess();
@@ -129,7 +136,9 @@ function convertInputToGuess() {
 
 let keyboardState = {};
 let isShaking = false;
-const SHAKE_DURATION = 500;
+let isInputting = false;
+const SHAKE_ANIMATION_DURATION = 500;
+const INPUT_ANIMATION_DURATION = 100;
 
 "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach((key) => {
   keyboardState[key] = { character: key, color: "lgrey" };
@@ -179,9 +188,15 @@ function renderTileGrid() {
     }
   }
   // 2. The current input
-  for (const char of currentInput.split("")) {
-    tileElements.push(convertInputToTile(char));
-  }
+  currentInput.split("").forEach((char, index) => {
+    const tile = convertInputToTile(char);
+    // the last tile
+    if (index === currentInput.length - 1 && isInputting) {
+      console.log("The last letter is " + char);
+      tile.classList.add("inputting");
+    }
+    tileElements.push(tile);
+  });
   // 2.a) plus what's necessary to fill that row
   for (let i = currentInput.length; i < 5; i++) {
     const tile = createEmptyTile();
@@ -194,6 +209,8 @@ function renderTileGrid() {
   while (tileElements.length < 5 * 6) {
     tileElements.push(createEmptyTile());
   }
+  // if there's too many, trim them
+  tileElements.splice(5 * 6);
   // Replace the tile grid with these tiles
   const TILEGRID = document.getElementById("tilegrid");
   TILEGRID.innerHTML = "";
@@ -202,13 +219,24 @@ function renderTileGrid() {
   }
 }
 
-function shake() {
+function triggerShakeAnimation() {
   isShaking = true;
   updateUI();
   setTimeout(() => {
     isShaking = false;
     updateUI();
-  }, SHAKE_DURATION);
+  }, SHAKE_ANIMATION_DURATION);
+}
+
+function triggerInputtingAnimation() {
+  isInputting = false;
+  updateUI();
+  isInputting = true;
+  updateUI();
+  setTimeout(() => {
+    isInputting = false;
+    updateUI();
+  }, 1000);
 }
 
 // The keyboard
@@ -271,6 +299,7 @@ function renderKeyboard() {
 }
 
 function updateUI() {
+  console.log("updateUI says isInputting is " + isInputting);
   renderTileGrid();
   renderKeyboard();
 }
@@ -285,8 +314,7 @@ document.addEventListener("keydown", (e) => {
   if (e.code.toString() === "Backspace") handleBackspaceEvent();
   if (e.code.toString().startsWith("Key")) {
     const letter = e.code.toString().substring(3);
-    addLetterToInput(letter);
-    updateUI();
+    handleInput(letter);
   }
 });
 
