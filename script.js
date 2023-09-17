@@ -192,7 +192,6 @@ function renderTileGrid() {
     const tile = convertInputToTile(char);
     // the last tile
     if (index === currentInput.length - 1 && isInputting) {
-      console.log("The last letter is " + char);
       tile.classList.add("inputting");
     }
     tileElements.push(tile);
@@ -299,7 +298,6 @@ function renderKeyboard() {
 }
 
 function updateUI() {
-  console.log("updateUI says isInputting is " + isInputting);
   renderTileGrid();
   renderKeyboard();
 }
