@@ -55,16 +55,19 @@ function attemptSubmit() {
   // has the word been guessed before
   if (guessStringHistory.includes(currentInput)) {
     showTooltip("Guessed before");
+    shake();
     return;
   }
   // are there 5 letters
   if (currentInput.length !== 5) {
     showTooltip("Not enough letters");
+    shake();
     return;
   }
   // is the word legal?
   if (!LEGAL_WORDS.includes(currentInput)) {
     showTooltip("Not a word");
+    shake();
     return;
   }
   const row = convertInputToGuess();
@@ -125,6 +128,9 @@ function convertInputToGuess() {
 // ===============================================
 
 let keyboardState = {};
+let isShaking = false;
+const SHAKE_DURATION = 500;
+
 "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach((key) => {
   keyboardState[key] = { character: key, color: "lgrey" };
 });
@@ -155,6 +161,9 @@ function createEmptyTile() {
 function convertInputToTile(characterStr) {
   const tileElement = createBlankTile();
   tileElement.classList.add("inputted");
+  if (isShaking) {
+    tileElement.classList.add("shaking");
+  }
   const text = document.createElement("p");
   text.innerHTML = characterStr;
   tileElement.appendChild(text);
@@ -173,6 +182,14 @@ function renderTileGrid() {
   for (const char of currentInput.split("")) {
     tileElements.push(convertInputToTile(char));
   }
+  // 2.a) plus what's necessary to fill that row
+  for (let i = currentInput.length; i < 5; i++) {
+    const tile = createEmptyTile();
+    if (isShaking) {
+      tile.classList.add("shaking");
+    }
+    tileElements.push(tile);
+  }
   // 3. Those required to fill the grid
   while (tileElements.length < 5 * 6) {
     tileElements.push(createEmptyTile());
@@ -183,6 +200,15 @@ function renderTileGrid() {
   for (const tileElement of tileElements) {
     TILEGRID.appendChild(tileElement);
   }
+}
+
+function shake() {
+  isShaking = true;
+  updateUI();
+  setTimeout(() => {
+    isShaking = false;
+    updateUI();
+  }, SHAKE_DURATION);
 }
 
 // The keyboard

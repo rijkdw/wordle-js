@@ -11,6 +11,8 @@
   --dgrey: #3a3a3c;
   --mgrey: #565758;
   --lgrey: #7f8182;
+  /* Durations */
+  --shake-duration: 500ms;
 }
 
 * {
@@ -79,7 +81,7 @@ p {
 
 .shaking {
   animation-name: shaking;
-  animation-duration: 400ms;
+  animation-duration: var(--shake-duration);
 }
 
 @keyframes shaking {
@@ -87,20 +89,24 @@ p {
     transform: translate(0);
   }
 
-  20% {
+  16.66% {
     transform: translate(1rem);
   }
 
-  40% {
+  33.33% {
     transform: translate(-1rem);
   }
 
-  60% {
+  50% {
     transform: translate(1rem);
   }
 
-  80% {
+  66.66% {
     transform: translate(-1rem);
+  }
+
+  83.33% {
+    transform: translate(1rem);
   }
 
   to {
@@ -157,6 +163,9 @@ p {
   text-align: center;
   width: 4rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .keyboard-key.lgrey {
