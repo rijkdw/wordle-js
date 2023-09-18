@@ -20,6 +20,8 @@
   margin: 0;
   padding: 0;
   user-select: none;
+  color: white;
+  animation-iteration-count: infinite;
 }
 
 body {
@@ -27,6 +29,13 @@ body {
 }
 
 p {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+header {
+  display: flex;
+  justify-content: center;
+  font-size: 4rem;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -115,13 +124,13 @@ p {
   }
 }
 
-.flip {
-  animation-name: flip;
+.flipping {
+  animation-name: flipping;
   animation-timing-function: ease-in;
   animation-duration: 300ms;
 }
 
-@keyframes flip {
+@keyframes flipping {
   from {
     transform: scaleY(1);
   }

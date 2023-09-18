@@ -16,6 +16,7 @@ fetch("./valid-wordle-words.txt")
   });
 const CORRECT_WORD = "WHISK";
 let currentInput = "";
+let isLocked = false;
 
 // a 2D list of GuessCharObj objects.
 // type GuessCharObj = {character: string, color: Color};
@@ -29,6 +30,9 @@ function createInputKeyPressCallback(char) {
 }
 
 function handleInput(char) {
+  if (isLocked) {
+    return;
+  }
   addLetterToInput(char);
   triggerInputtingAnimation();
   updateUI();
@@ -39,6 +43,9 @@ function createBackspaceKeyPressCallback() {
 }
 
 function handleBackspaceEvent() {
+  if (isLocked) {
+    return;
+  }
   isInputting = false;
   currentInput = currentInput.substring(0, currentInput.length - 1);
   updateUI();
@@ -49,6 +56,9 @@ function createEnterKeyPressCallback() {
 }
 
 function handleEnterEvent() {
+  if (isLocked) {
+    return;
+  }
   isInputting = false;
   attemptSubmit();
   updateUI();
@@ -137,6 +147,7 @@ function convertInputToGuess() {
 let keyboardState = {};
 let isShaking = false;
 let isInputting = false;
+let isFlipping = [false, false, false, false, false];
 const SHAKE_ANIMATION_DURATION = 500;
 const INPUT_ANIMATION_DURATION = 100;
 
@@ -194,6 +205,10 @@ function renderTileGrid() {
     if (index === currentInput.length - 1 && isInputting) {
       tile.classList.add("inputting");
     }
+    // flipping
+    if (isFlipping[index]) {
+      tile.classList.add("flipping");
+    }
     tileElements.push(tile);
   });
   // 2.a) plus what's necessary to fill that row
@@ -235,7 +250,20 @@ function triggerInputtingAnimation() {
   setTimeout(() => {
     isInputting = false;
     updateUI();
-  }, 1000);
+  }, INPUT_ANIMATION_DURATION);
+}
+
+function triggerFlippingAnimation() {
+  const interval = 200;
+  const duration = 201;
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      isFlipping[i] = true;
+    }, interval * i);
+    setTimeout(() => {
+      isFlipping[i] = false;
+    }, interval * i + duration);
+  }
 }
 
 // The keyboard
