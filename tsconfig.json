@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "lib": [
+      "ES2017", "DOM"
+    ],
     "target": "es2016",
     "module": "commonjs",
     "esModuleInterop": true,

@@ -4,12 +4,14 @@
   "description": "",
   "main": "script.js",
   "scripts": {
-    "tsc": "tsc src/*.ts --outDir ."
+    "tsc": "tsc src/*.ts --outDir .",
+    "start": "nodemon --watch src --exec tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "nodemon": "^3.0.1",
     "typescript": "^5.2.2"
   }
 }
