@@ -13,6 +13,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 // =======================================================================
 // Model
+// * stores state
+// * provides data derived from state
+// * does not modify self
 // =======================================================================
 class Model {
     constructor(correctWord, legalWords) {
@@ -31,7 +34,7 @@ class Model {
     }
     loadLegalWordsForSelf() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.legalWords = yield Model.loadLegalWords();
+            this.legalWords = yield loadLegalWords();
         });
     }
     setupKeyboardStatus() {
@@ -39,7 +42,7 @@ class Model {
             this.keyboardStatus.set(letter, "unused");
         }
     }
-    // checks
+    // derived data
     mayCurrentInputBeAccepted() {
         return (this.currentInput.length === 5 &&
             this.legalWords.includes(this.currentInput));
@@ -65,7 +68,6 @@ class Model {
     isGameOver() {
         return this.hasReachedGuessLimit();
     }
-    // conversions
     getCurrentInputAsGuess() {
         return wordleComparisonAlgorithm(this.currentInput, this.correctWord);
     }
@@ -76,16 +78,6 @@ class Model {
         return this.guessHistory[this.guessHistory.length - 1]
             .map((x) => x.letter)
             .join("");
-    }
-    // Domain-specific functions
-    static loadLegalWords() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const response = yield fetch("./valid-wordle-words.txt");
-            if (!response.ok) {
-                throw new Error("Could not read legal words file");
-            }
-            return (yield response.text()).split("\n").map((x) => x.toUpperCase());
-        });
     }
 }
 // -----------------------------------------------------------------------
@@ -99,6 +91,15 @@ function betterLetterStatus(a, b) {
         return a;
     }
     return b;
+}
+function loadLegalWords() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch("./valid-wordle-words.txt");
+        if (!response.ok) {
+            throw new Error("Could not read legal words file");
+        }
+        return (yield response.text()).split("\n").map((x) => x.toUpperCase());
+    });
 }
 function wordleComparisonAlgorithm(inputWord, correctWord) {
     const result = [];
@@ -285,7 +286,6 @@ function setupPhysicalKeyboardListener(controller) {
         }
     };
     document.addEventListener("keydown", callback);
-    return callback;
 }
 function setupVirtualKeyboadListeners(controller) {
     KEYBOARD_LAYOUT_TEMPLATE.forEach((row) => {

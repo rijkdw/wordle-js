@@ -46,6 +46,9 @@ type KeyboardKeyData = {
 
 // =======================================================================
 // Model
+// * stores state
+// * provides data derived from state
+// * does not modify self
 // =======================================================================
 
 class Model {
@@ -70,7 +73,7 @@ class Model {
   }
 
   async loadLegalWordsForSelf() {
-    this.legalWords = await Model.loadLegalWords();
+    this.legalWords = await loadLegalWords();
   }
 
   setupKeyboardStatus() {
@@ -79,7 +82,7 @@ class Model {
     }
   }
 
-  // checks
+  // derived data
 
   mayCurrentInputBeAccepted(): boolean {
     return (
@@ -115,8 +118,6 @@ class Model {
     return this.hasReachedGuessLimit();
   }
 
-  // conversions
-
   getCurrentInputAsGuess(): Guess {
     return wordleComparisonAlgorithm(this.currentInput, this.correctWord);
   }
@@ -129,16 +130,6 @@ class Model {
     return this.guessHistory[this.guessHistory.length - 1]
       .map((x) => x.letter)
       .join("");
-  }
-
-  // Domain-specific functions
-
-  static async loadLegalWords() {
-    const response = await fetch("./valid-wordle-words.txt");
-    if (!response.ok) {
-      throw new Error("Could not read legal words file");
-    }
-    return (await response.text()).split("\n").map((x) => x.toUpperCase());
   }
 }
 
@@ -157,6 +148,14 @@ function betterLetterStatus(
     return a;
   }
   return b;
+}
+
+async function loadLegalWords() {
+  const response = await fetch("./valid-wordle-words.txt");
+  if (!response.ok) {
+    throw new Error("Could not read legal words file");
+  }
+  return (await response.text()).split("\n").map((x) => x.toUpperCase());
 }
 
 function wordleComparisonAlgorithm(
@@ -357,9 +356,7 @@ const KEYBOARD_LAYOUT_TEMPLATE: KeyboardKeyLetter[][] = [
   ["ENTER", ..."ZXCVBNM".split(""), "BACKSPACE"],
 ] as KeyboardKeyLetter[][];
 
-function setupPhysicalKeyboardListener(
-  controller: Controller
-): (event: KeyboardEvent) => void {
+function setupPhysicalKeyboardListener(controller: Controller) {
   const callback = (event: KeyboardEvent) => {
     if (event.repeat) {
       return;
@@ -376,7 +373,6 @@ function setupPhysicalKeyboardListener(
     }
   };
   document.addEventListener("keydown", callback);
-  return callback;
 }
 
 function setupVirtualKeyboadListeners(controller: Controller) {
