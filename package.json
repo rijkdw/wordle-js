@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "script.js",
-  "scripts": {
-    "tsc": "tsc src/*.ts --outDir .",
-    "start": "nodemon --watch src --exec tsc"
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",

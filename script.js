@@ -1,4 +1,7 @@
 "use strict";
+// =======================================================================
+// Types
+// =======================================================================
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,6 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+// =======================================================================
+// Model
+// =======================================================================
 class Model {
     constructor(correctWord, legalWords) {
         this.correctWord = correctWord;
@@ -82,6 +88,9 @@ class Model {
         });
     }
 }
+// -----------------------------------------------------------------------
+// Model helpers
+// -----------------------------------------------------------------------
 function betterLetterStatus(a, b) {
     const indexMap = ["green", "yellow", "grey", "unused"];
     const aIndex = indexMap.indexOf(a);
@@ -114,23 +123,6 @@ function wordleComparisonAlgorithm(inputWord, correctWord) {
         }
     }
     return result;
-}
-function setupPhysicalKeyboardListener(controller) {
-    document.addEventListener("keydown", (event) => {
-        if (event.repeat) {
-            return;
-        }
-        if (event.code.toString() === "Enter") {
-            controller.handleSubmitEvent();
-        }
-        if (event.code.toString() === "Backspace") {
-            controller.handleBackspaceEvent();
-        }
-        if (event.code.toString().startsWith("Key")) {
-            const letter = event.code.toString().substring(3).toUpperCase();
-            controller.handleLetterInputEvent(letter);
-        }
-    });
 }
 class ConsoleView {
     setupListeners(controller) {
@@ -206,11 +198,6 @@ class HTMLView {
         }
     }
     static createKeyboardLayout(model) {
-        const KEYBOARD_LAYOUT_TEMPLATE = [
-            "QWERTYUIOP".split(""),
-            "ASDFGHJKL".split(""),
-            ["ENTER", ..."ZXCVBNM".split(""), "BACKSPACE"],
-        ];
         return KEYBOARD_LAYOUT_TEMPLATE.map((row) => row.map((letter) => {
             var _a;
             return {
@@ -230,6 +217,7 @@ class HTMLView {
             rowElement.id = "keyboard-row-" + (i + 1);
             for (const keyData of row) {
                 const keyElement = document.createElement("div");
+                keyElement.id = "key-" + keyData.face;
                 const p = document.createElement("p");
                 p.innerHTML = keyData.face === "BACKSPACE" ? "<" : keyData.face;
                 keyElement.classList.add("keyboard-key");
@@ -269,21 +257,72 @@ class HTMLView {
         return div;
     }
     setupListeners(controller) {
-        setupPhysicalKeyboardListener(controller);
-        // TODO virtual keyboard
+        setupVirtualKeyboadListeners(controller);
     }
 }
+// -----------------------------------------------------------------------
+// View helpers
+// -----------------------------------------------------------------------
+const KEYBOARD_LAYOUT_TEMPLATE = [
+    "QWERTYUIOP".split(""),
+    "ASDFGHJKL".split(""),
+    ["ENTER", ..."ZXCVBNM".split(""), "BACKSPACE"],
+];
+function setupPhysicalKeyboardListener(controller) {
+    const callback = (event) => {
+        if (event.repeat) {
+            return;
+        }
+        if (event.code.toString() === "Enter") {
+            controller.handleSubmitEvent();
+        }
+        if (event.code.toString() === "Backspace") {
+            controller.handleBackspaceEvent();
+        }
+        if (event.code.toString().startsWith("Key")) {
+            const letter = event.code.toString().substring(3).toUpperCase();
+            controller.handleLetterInputEvent(letter);
+        }
+    };
+    document.addEventListener("keydown", callback);
+    return callback;
+}
+function setupVirtualKeyboadListeners(controller) {
+    KEYBOARD_LAYOUT_TEMPLATE.forEach((row) => {
+        row.forEach((key) => {
+            const id = "key-" + key;
+            const keyElement = document.getElementById(id);
+            if (keyElement === null) {
+                return;
+            }
+            if (key === "ENTER") {
+                keyElement.addEventListener("click", () => controller.handleSubmitEvent());
+            }
+            else if (key === "BACKSPACE") {
+                keyElement.addEventListener("click", () => controller.handleBackspaceEvent());
+            }
+            else {
+                keyElement.addEventListener("click", () => controller.handleLetterInputEvent(key.repeat(1)));
+            }
+        });
+    });
+}
+// =======================================================================
+// Controller
+// =======================================================================
 class Controller {
     constructor(model, view) {
         this.model = model;
         this.view = view;
+        setupPhysicalKeyboardListener(this);
     }
     initialize() {
-        this.view.setupListeners(this);
         this.view.update(this.model);
+        this.view.setupListeners(this);
     }
     postModelUpdateRoutine() {
         this.view.update(this.model);
+        this.view.setupListeners(this);
     }
     updateKeyboardStatus(guess) {
         guess.forEach((letterData) => {
@@ -322,6 +361,9 @@ class Controller {
         this.postModelUpdateRoutine();
     }
 }
+// =======================================================================
+// Startup
+// =======================================================================
 function main() {
     const model = new Model("WHISK", "load");
     const view = new HTMLView();
