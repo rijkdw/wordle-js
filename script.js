@@ -30,7 +30,7 @@ class Model {
     }
     setupKeyboardStatus() {
         for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
-            this.keyboardStatus.set(letter, "grey");
+            this.keyboardStatus.set(letter, "unused");
         }
     }
     // checks
@@ -83,7 +83,7 @@ class Model {
     }
 }
 function betterLetterStatus(a, b) {
-    const indexMap = ["green", "yellow", "grey"];
+    const indexMap = ["green", "yellow", "grey", "unused"];
     const aIndex = indexMap.indexOf(a);
     const bIndex = indexMap.indexOf(b);
     if (aIndex < bIndex) {
@@ -215,7 +215,7 @@ class HTMLView {
             var _a;
             return {
                 face: letter,
-                status: (_a = model.keyboardStatus.get(letter)) !== null && _a !== void 0 ? _a : "grey",
+                status: (_a = model.keyboardStatus.get(letter)) !== null && _a !== void 0 ? _a : "green",
             };
         }));
     }
@@ -233,6 +233,7 @@ class HTMLView {
                 const p = document.createElement("p");
                 p.innerHTML = keyData.face === "BACKSPACE" ? "<" : keyData.face;
                 keyElement.classList.add("keyboard-key");
+                keyElement.classList.add(keyData.status);
                 keyElement.appendChild(p);
                 if (keyData.face === "ENTER") {
                     keyElement.classList.add("wide");

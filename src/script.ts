@@ -33,7 +33,7 @@ type LetterInGuessData = {
 };
 type Guess = LetterInGuessData[];
 
-type KeyboardKeyStatus = "green" | "yellow" | "grey" | "dark";
+type KeyboardKeyStatus = "green" | "yellow" | "grey" | "unused";
 type KeyboardKeyLetter = Letter | "ENTER" | "BACKSPACE";
 type KeyboardKeyData = {
   face: KeyboardKeyLetter;
@@ -67,7 +67,7 @@ class Model {
 
   setupKeyboardStatus() {
     for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
-      this.keyboardStatus.set(letter as Letter, "grey");
+      this.keyboardStatus.set(letter as Letter, "unused");
     }
   }
 
@@ -138,7 +138,7 @@ function betterLetterStatus(
   a: LetterInGuessStatus,
   b: LetterInGuessStatus
 ): LetterInGuessStatus {
-  const indexMap: LetterInGuessStatus[] = ["green", "yellow", "grey"];
+  const indexMap = ["green", "yellow", "grey", "unused"];
   const aIndex = indexMap.indexOf(a);
   const bIndex = indexMap.indexOf(b);
   if (aIndex < bIndex) {
@@ -289,7 +289,7 @@ class HTMLView implements IView {
       row.map((letter) => {
         return {
           face: letter as KeyboardKeyLetter,
-          status: model.keyboardStatus.get(letter as Letter) ?? "grey",
+          status: model.keyboardStatus.get(letter as Letter) ?? "green",
         };
       })
     );
@@ -309,6 +309,7 @@ class HTMLView implements IView {
         const p = document.createElement("p");
         p.innerHTML = keyData.face === "BACKSPACE" ? "<" : keyData.face;
         keyElement.classList.add("keyboard-key");
+        keyElement.classList.add(keyData.status);
         keyElement.appendChild(p);
         if (keyData.face === "ENTER") {
           keyElement.classList.add("wide");

@@ -198,11 +198,11 @@ header {
   justify-content: center;
 }
 
-.keyboard-key.lgrey {
+.keyboard-key.unused {
   background-color: var(--lgrey);
 }
 
-.keyboard-key.dgrey {
+.keyboard-key.grey {
   background-color: var(--dgrey);
 }
 
