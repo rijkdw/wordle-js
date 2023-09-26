@@ -136,7 +136,9 @@ class View {
     updateTileGrid(model) {
         const TILE_GRID_ELEMENT = document.getElementById("tilegrid");
         // clear the grid
-        TILE_GRID_ELEMENT.innerHTML = "";
+        while (TILE_GRID_ELEMENT.firstChild) {
+            TILE_GRID_ELEMENT.removeChild(TILE_GRID_ELEMENT.firstChild);
+        }
         // repopulate the grid
         model.guessHistory.forEach((guess, guessIndex) => {
             guess.forEach((letterData, letterIndex) => {
@@ -151,14 +153,18 @@ class View {
         model
             .getCurrentInputPadded()
             .split("")
-            .forEach((letter) => {
+            .forEach((letter, letterIndex) => {
+            const guessIndex = model.guessHistory.length;
             const element = View.letterToTileElement(letter);
+            element.id = "tile-" + guessIndex + "-" + letterIndex;
             TILE_GRID_ELEMENT.appendChild(element);
         });
         const emptyTilesToFill = 5 - model.guessHistory.length;
         for (let i = 0; i < emptyTilesToFill; i++) {
-            "     ".split("").forEach((letter) => {
+            "     ".split("").forEach((letter, letterIndex) => {
+                const guessIndex = model.guessHistory.length + 1;
                 const element = View.letterToTileElement(letter);
+                element.id = "tile-" + guessIndex + "-" + letterIndex;
                 TILE_GRID_ELEMENT.appendChild(element);
             });
         }
@@ -207,6 +213,9 @@ class View {
         div.classList.add("tile");
         if (letter !== " ") {
             div.classList.add("inputted");
+        }
+        else {
+            div.classList.add("empty");
         }
         const p = document.createElement("p");
         p.innerHTML = letter;
