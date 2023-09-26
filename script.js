@@ -125,46 +125,10 @@ function wordleComparisonAlgorithm(inputWord, correctWord) {
     }
     return result;
 }
-class ConsoleView {
-    setupListeners(controller) {
-        setupPhysicalKeyboardListener(controller);
-    }
-    update(model) {
-        console.clear();
-        // past words
-        model.guessHistory.forEach((x) => {
-            const repr = ConsoleView.guessToStringRepr(x);
-            console.log(repr);
-        });
-        // current input
-        if (model.hasReachedGuessLimit()) {
-            return;
-        }
-        console.log(ConsoleView.currentInputToStringRepr(model.getCurrentInputPadded()));
-    }
-    static guessToStringRepr(guess) {
-        return guess
-            .map((letterData) => {
-            switch (letterData.status) {
-                case "green":
-                    return " " + letterData.letter + " ";
-                case "grey":
-                    return "-" + letterData.letter.toLowerCase() + "-";
-                case "yellow":
-                    return "[" + letterData.letter.toLowerCase() + "]";
-            }
-        })
-            .join(" ");
-    }
-    static currentInputToStringRepr(currentInput) {
-        return currentInput
-            .split("")
-            .map((letter) => (letter === " " ? "   " : " " + letter + " "))
-            .map((letter) => letter.toLowerCase())
-            .join(" ");
-    }
-}
-class HTMLView {
+// =======================================================================
+// View
+// =======================================================================
+class View {
     update(model) {
         this.updateTileGrid(model);
         this.updateKeyboard(model);
@@ -176,7 +140,7 @@ class HTMLView {
         // repopulate the grid
         model.guessHistory.forEach((guess, guessIndex) => {
             guess.forEach((letterData, letterIndex) => {
-                const element = HTMLView.letterInGuessDataToTileElement(letterData);
+                const element = View.letterInGuessDataToTileElement(letterData);
                 element.id = "tile-" + guessIndex + "-" + letterIndex;
                 TILE_GRID_ELEMENT.appendChild(element);
             });
@@ -188,13 +152,13 @@ class HTMLView {
             .getCurrentInputPadded()
             .split("")
             .forEach((letter) => {
-            const element = HTMLView.letterToTileElement(letter);
+            const element = View.letterToTileElement(letter);
             TILE_GRID_ELEMENT.appendChild(element);
         });
         const emptyTilesToFill = 5 - model.guessHistory.length;
         for (let i = 0; i < emptyTilesToFill; i++) {
             "     ".split("").forEach((letter) => {
-                const element = HTMLView.letterToTileElement(letter);
+                const element = View.letterToTileElement(letter);
                 TILE_GRID_ELEMENT.appendChild(element);
             });
         }
@@ -211,7 +175,7 @@ class HTMLView {
     updateKeyboard(model) {
         const KEYBOARD_ELEMENT = document.getElementById("keyboard");
         KEYBOARD_ELEMENT.innerHTML = "";
-        const keyboardLayout = HTMLView.createKeyboardLayout(model);
+        const keyboardLayout = View.createKeyboardLayout(model);
         keyboardLayout.forEach((row, i) => {
             const rowElement = document.createElement("div");
             rowElement.classList.add("keyboard-row");
@@ -367,7 +331,7 @@ class Controller {
 // =======================================================================
 function main() {
     const model = new Model("WHISK", "load");
-    const view = new HTMLView();
+    const view = new View();
     const controller = new Controller(model, view);
     controller.initialize();
 }

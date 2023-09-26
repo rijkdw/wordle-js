@@ -188,57 +188,7 @@ function wordleComparisonAlgorithm(
 // View
 // =======================================================================
 
-interface IView {
-  update: (model: Model) => void;
-  setupListeners: (controller: Controller) => void;
-}
-
-class ConsoleView implements IView {
-  setupListeners(controller: Controller) {
-    setupPhysicalKeyboardListener(controller);
-  }
-
-  update(model: Model) {
-    console.clear();
-    // past words
-    model.guessHistory.forEach((x) => {
-      const repr = ConsoleView.guessToStringRepr(x);
-      console.log(repr);
-    });
-    // current input
-    if (model.hasReachedGuessLimit()) {
-      return;
-    }
-    console.log(
-      ConsoleView.currentInputToStringRepr(model.getCurrentInputPadded())
-    );
-  }
-
-  static guessToStringRepr(guess: Guess): string {
-    return guess
-      .map((letterData) => {
-        switch (letterData.status) {
-          case "green":
-            return " " + letterData.letter + " ";
-          case "grey":
-            return "-" + letterData.letter.toLowerCase() + "-";
-          case "yellow":
-            return "[" + letterData.letter.toLowerCase() + "]";
-        }
-      })
-      .join(" ");
-  }
-
-  static currentInputToStringRepr(currentInput: string): string {
-    return currentInput
-      .split("")
-      .map((letter) => (letter === " " ? "   " : " " + letter + " "))
-      .map((letter) => letter.toLowerCase())
-      .join(" ");
-  }
-}
-
-class HTMLView implements IView {
+class View {
   update(model: Model) {
     this.updateTileGrid(model);
     this.updateKeyboard(model);
@@ -253,7 +203,7 @@ class HTMLView implements IView {
     // repopulate the grid
     model.guessHistory.forEach((guess, guessIndex) => {
       guess.forEach((letterData, letterIndex) => {
-        const element = HTMLView.letterInGuessDataToTileElement(letterData);
+        const element = View.letterInGuessDataToTileElement(letterData);
         element.id = "tile-" + guessIndex + "-" + letterIndex;
         TILE_GRID_ELEMENT!.appendChild(element);
       });
@@ -265,13 +215,13 @@ class HTMLView implements IView {
       .getCurrentInputPadded()
       .split("")
       .forEach((letter) => {
-        const element = HTMLView.letterToTileElement(letter);
+        const element = View.letterToTileElement(letter);
         TILE_GRID_ELEMENT!.appendChild(element);
       });
     const emptyTilesToFill = 5 - model.guessHistory.length;
     for (let i = 0; i < emptyTilesToFill; i++) {
       "     ".split("").forEach((letter) => {
-        const element = HTMLView.letterToTileElement(letter);
+        const element = View.letterToTileElement(letter);
         TILE_GRID_ELEMENT!.appendChild(element);
       });
     }
@@ -291,7 +241,7 @@ class HTMLView implements IView {
   updateKeyboard(model: Model) {
     const KEYBOARD_ELEMENT = document.getElementById("keyboard") as HTMLElement;
     KEYBOARD_ELEMENT.innerHTML = "";
-    const keyboardLayout = HTMLView.createKeyboardLayout(model);
+    const keyboardLayout = View.createKeyboardLayout(model);
     keyboardLayout.forEach((row, i) => {
       const rowElement = document.createElement("div");
       rowElement.classList.add("keyboard-row");
@@ -407,9 +357,9 @@ function setupVirtualKeyboadListeners(controller: Controller) {
 
 class Controller {
   model: Model;
-  view: IView;
+  view: View;
 
-  constructor(model: Model, view: IView) {
+  constructor(model: Model, view: View) {
     this.model = model;
     this.view = view;
     setupPhysicalKeyboardListener(this);
@@ -475,7 +425,7 @@ class Controller {
 
 function main() {
   const model = new Model("WHISK", "load");
-  const view = new HTMLView();
+  const view = new View();
   const controller = new Controller(model, view);
   controller.initialize();
 }
