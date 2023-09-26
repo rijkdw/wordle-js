@@ -24,11 +24,6 @@ describe("Input", () => {
     expect(getTile(0, 2).contains("L"));
     expect(getTile(0, 3).contains("L"));
     expect(getTile(0, 4).contains("O"));
-
-    // // tiles -- colors
-
-    // // keyboard -- colors
-    // TODO
   });
 
   it("with physical keyboard", () => {
