@@ -174,9 +174,10 @@ class HTMLView {
         // clear the grid
         TILE_GRID_ELEMENT.innerHTML = "";
         // repopulate the grid
-        model.guessHistory.forEach((guess) => {
-            guess.forEach((letterData) => {
+        model.guessHistory.forEach((guess, guessIndex) => {
+            guess.forEach((letterData, letterIndex) => {
                 const element = HTMLView.letterInGuessDataToTileElement(letterData);
+                element.id = "tile-" + guessIndex + "-" + letterIndex;
                 TILE_GRID_ELEMENT.appendChild(element);
             });
         });
@@ -219,11 +220,8 @@ class HTMLView {
             for (const keyData of row) {
                 const keyElement = document.createElement("div");
                 keyElement.id = "key-" + keyData.face;
-                const p = document.createElement("p");
-                p.innerHTML = keyData.face === "BACKSPACE" ? "<" : keyData.face;
                 keyElement.classList.add("keyboard-key");
                 keyElement.classList.add(keyData.status);
-                keyElement.appendChild(p);
                 if (keyData.face === "ENTER") {
                     keyElement.classList.add("wide");
                     keyElement.classList.add("enter");
@@ -232,6 +230,9 @@ class HTMLView {
                     keyElement.classList.add("wide");
                     keyElement.classList.add("backspace");
                 }
+                const p = document.createElement("p");
+                p.innerHTML = keyData.face === "BACKSPACE" ? "<" : keyData.face;
+                keyElement.appendChild(p);
                 rowElement.appendChild(keyElement);
             }
             KEYBOARD_ELEMENT.appendChild(rowElement);
