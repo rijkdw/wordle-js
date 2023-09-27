@@ -18,11 +18,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 // * does not modify self
 // =======================================================================
 class Model {
-    // TODO separate into:
+    // TODO (later): separate into:
     // 1. onInputChanged, for when the user types something
     // 2. onInputAccepted, for when the user successfully submits a guess
-    //   2.a) tiles
-    //   2.b) keyboard
     constructor(correctWord, legalWords) {
         this.correctWord = correctWord;
         this.currentInput = "";
@@ -65,7 +63,7 @@ class Model {
         return this.hasReachedGuessLimit();
     }
     getCurrentInputAsGuess() {
-        return wordleComparisonAlgorithm(this.currentInput, this.correctWord);
+        return performWordleComparison(this.currentInput, this.correctWord);
     }
     getCurrentInputPadded() {
         return this.currentInput.padEnd(5, " ");
@@ -75,7 +73,7 @@ class Model {
             .map((x) => x.letter)
             .join("");
     }
-    // changes to model
+    // modify self
     acceptCurrentInput() {
         if (!this.mayCurrentInputBeAccepted()) {
             return;
@@ -95,7 +93,7 @@ class Model {
         guess.forEach((letterData) => {
             const pastStatus = this.keyboardStatus.get(letterData.letter);
             const newStatus = letterData.status;
-            const better = betterLetterStatus(pastStatus, newStatus);
+            const better = chooseBetterLetterStatus(pastStatus, newStatus);
             this.keyboardStatus.set(letterData.letter, better);
         });
         this.onModelChanged(this);
@@ -119,14 +117,14 @@ class Model {
     }
     loadLegalWordsForSelf() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.legalWords = yield loadLegalWords();
+            this.legalWords = yield loadLegalWordsAsync();
         });
     }
 }
 // -----------------------------------------------------------------------
 // Model helpers
 // -----------------------------------------------------------------------
-function betterLetterStatus(a, b) {
+function chooseBetterLetterStatus(a, b) {
     const indexMap = ["green", "yellow", "grey", "unused"];
     const aIndex = indexMap.indexOf(a);
     const bIndex = indexMap.indexOf(b);
@@ -135,7 +133,7 @@ function betterLetterStatus(a, b) {
     }
     return b;
 }
-function loadLegalWords() {
+function loadLegalWordsAsync() {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield fetch("./valid-wordle-words.txt");
         if (!response.ok) {
@@ -151,7 +149,7 @@ function createKeyboardStatus() {
     }
     return map;
 }
-function wordleComparisonAlgorithm(inputWord, correctWord) {
+function performWordleComparison(inputWord, correctWord) {
     const result = [];
     const inputLetters = inputWord.split("");
     const correctLetters = correctWord.split("");
@@ -183,7 +181,7 @@ class View {
         this.tileGridRoot = document.querySelector("div#tilegrid");
         this.keyboardRoot = document.querySelector("div#keyboard");
     }
-    bindKeyPressOnVirtualKeyboard(callback) {
+    bindKeyPressOnPhysicalKeyboard(callback) {
         document.addEventListener("keydown", (event) => {
             if (event.repeat) {
                 return;
@@ -222,11 +220,11 @@ class View {
             callback(letter);
         });
     }
-    update(model) {
-        this.updateTileGrid(model);
-        this.updateKeyboard(model);
+    render(model) {
+        this.renderTileGrid(model);
+        this.renderKeyboard(model);
     }
-    updateTileGrid(model) {
+    renderTileGrid(model) {
         // clear the grid
         while (this.tileGridRoot.firstChild) {
             this.tileGridRoot.removeChild(this.tileGridRoot.firstChild);
@@ -261,11 +259,11 @@ class View {
             });
         }
     }
-    updateKeyboard(model) {
+    renderKeyboard(model) {
         while (this.keyboardRoot.firstChild) {
             this.keyboardRoot.removeChild(this.keyboardRoot.firstChild);
         }
-        const keyboardLayout = createKeyboardLayout(model);
+        const keyboardLayout = createKeyboardLayout(model.keyboardStatus);
         keyboardLayout.forEach((row, i) => {
             const rowElement = document.createElement("div");
             rowElement.classList.add("keyboard-row");
@@ -291,9 +289,6 @@ class View {
             }
             this.keyboardRoot.appendChild(rowElement);
         });
-    }
-    setupListeners(controller) {
-        setupVirtualKeyboadListeners(controller);
     }
 }
 // -----------------------------------------------------------------------
@@ -327,118 +322,66 @@ function letterDataToTileElement(letterData) {
     div.appendChild(p);
     return div;
 }
-// TODO rely on keyboard status and not whole model
-function createKeyboardLayout(model) {
+function createKeyboardLayout(keyboardStatus) {
     return KEYBOARD_LAYOUT_TEMPLATE.map((row) => row.map((letter) => {
         var _a;
         return {
             face: letter,
-            status: (_a = model.keyboardStatus.get(letter)) !== null && _a !== void 0 ? _a : "green",
+            status: (_a = keyboardStatus.get(letter)) !== null && _a !== void 0 ? _a : "green",
         };
     }));
-}
-// TODO remove
-function setupPhysicalKeyboardListener(controller) {
-    const callback = (event) => {
-        if (event.repeat) {
-            return;
-        }
-        if (event.code.toString() === "Enter") {
-            controller.handleSubmitEvent();
-        }
-        if (event.code.toString() === "Backspace") {
-            controller.handleBackspaceEvent();
-        }
-        if (event.code.toString().startsWith("Key")) {
-            const letter = event.code.toString().substring(3).toUpperCase();
-            controller.handleLetterInputEvent(letter);
-        }
-    };
-    document.addEventListener("keydown", callback);
-}
-// TODO remove
-function setupVirtualKeyboadListeners(controller) {
-    KEYBOARD_LAYOUT_TEMPLATE.forEach((row) => {
-        row.forEach((key) => {
-            const id = "key-" + key;
-            const keyElement = document.getElementById(id);
-            if (keyElement === null) {
-                return;
-            }
-            if (key === "ENTER") {
-                keyElement.addEventListener("click", () => controller.handleSubmitEvent());
-            }
-            else if (key === "BACKSPACE") {
-                keyElement.addEventListener("click", () => controller.handleBackspaceEvent());
-            }
-            else {
-                keyElement.addEventListener("click", () => controller.handleLetterInputEvent(key.repeat(1)));
-            }
-        });
-    });
 }
 // =======================================================================
 // Controller
 // =======================================================================
 class Controller {
     constructor(model, view) {
+        this.onModelChanged = (model) => {
+            this.view.render(model);
+        };
+        this.handleKeypress = (letter) => {
+            if (letter === "ENTER") {
+                this.handleSubmit();
+            }
+            else if (letter === "BACKSPACE") {
+                this.handleDeleteLetter();
+            }
+            else {
+                this.handleAddLetter(letter);
+            }
+        };
+        this.handleAddLetter = (letter) => {
+            if (!this.model.mayAddLetter()) {
+                return;
+            }
+            if (this.model.hasReachedGuessLimit()) {
+                return;
+            }
+            this.model.addLetter(letter);
+        };
+        this.handleDeleteLetter = () => {
+            if (!this.model.mayDeleteLetter()) {
+                return;
+            }
+            this.model.deleteLetter();
+        };
+        this.handleSubmit = () => {
+            if (!this.model.mayCurrentInputBeAccepted()) {
+                return;
+            }
+            this.model.acceptCurrentInput();
+        };
         this.model = model;
         this.view = view;
-        setupPhysicalKeyboardListener(this); // TODO remove
-        this.view.update(this.model);
-        this.view.setupListeners(this);
-    }
-    postModelUpdateRoutine() {
-        this.view.update(this.model);
-        this.view.setupListeners(this);
-    }
-    // TODO remove
-    updateKeyboardStatus(guess) {
-        guess.forEach((letterData) => {
-            const pastStatus = this.model.keyboardStatus.get(letterData.letter);
-            const newStatus = letterData.status;
-            const better = betterLetterStatus(pastStatus, newStatus);
-            this.model.keyboardStatus.set(letterData.letter, better);
-        });
-    }
-    // TODO remove
-    handleLetterInputEvent(letter) {
-        if (!this.model.mayAddLetter()) {
-            return;
-        }
-        if (this.model.hasReachedGuessLimit()) {
-            return;
-        }
-        this.model.currentInput += letter;
-        this.postModelUpdateRoutine();
-    }
-    // TODO remove
-    handleSubmitEvent() {
-        if (!this.model.mayCurrentInputBeAccepted()) {
-            return;
-        }
-        const guess = this.model.getCurrentInputAsGuess();
-        this.model.guessHistory.push(guess);
-        this.model.currentInput = "";
-        this.updateKeyboardStatus(guess);
-        this.postModelUpdateRoutine();
-    }
-    // TODO remove
-    handleBackspaceEvent() {
-        if (!this.model.mayDeleteLetter()) {
-            return;
-        }
-        const c = this.model.currentInput;
-        this.model.currentInput = c.slice(0, c.length - 1);
-        this.postModelUpdateRoutine();
+        this.model.bindModelChanged(this.onModelChanged);
+        this.view.bindClickVirtualKeyboard(this.handleKeypress);
+        this.view.bindKeyPressOnPhysicalKeyboard(this.handleKeypress);
+        this.onModelChanged(this.model);
     }
 }
 // =======================================================================
 // Startup
 // =======================================================================
-function main() {
-    const model = new Model("WHISK");
-    const view = new View();
-    new Controller(model, view);
-}
-main();
+const model = new Model("WHISK");
+const view = new View();
+const app = new Controller(model, view);
