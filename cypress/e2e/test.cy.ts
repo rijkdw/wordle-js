@@ -239,6 +239,21 @@ describe("Tile colors change", () => {
   });
 });
 
+describe("Robustness", () => {
+  it("does not enter >5 letters", () => {
+    cy.visit("http://localhost:8000?word=XXXXX");
+    inputGuessAndHitEnter("HELLOWORLD", "physically");
+    "HELLO".split("").forEach((letter, letterIndex) => {
+      expect(getTile(0, letterIndex).should("contain", letter));
+      expect(getTile(0, letterIndex).should("have.class", "grey"));
+    });
+    "WORLD".split("").forEach((letter, letterIndex) => {
+      expect(getTile(1, letterIndex).should("not.contain", letter));
+      expect(getTile(1, letterIndex).should("not.have.class", "grey"));
+    });
+  });
+});
+
 describe("Word selection via URL", () => {
   it("defaults to HELLO", () => {
     cy.visit("http://localhost:8000");

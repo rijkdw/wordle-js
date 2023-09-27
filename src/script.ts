@@ -48,8 +48,8 @@ type KeyboardStatusMap = Map<Letter, KeyboardKeyStatus>;
 // =======================================================================
 // Model
 // * stores state
-// * provides data derived from state
-// * does not modify self
+// * provides derivative data (e.g. number of guesses)
+// * modifies self
 // =======================================================================
 
 class Model {
@@ -90,23 +90,35 @@ class Model {
     );
   }
 
-  mayAddLetter(): boolean {
+  currentInputNotFull() {
     return this.currentInput.length < 5;
   }
 
-  mayDeleteLetter(): boolean {
+  currentInputIsFull() {
+    return this.currentInput.length >= 5;
+  }
+
+  currentInputNotEmpty() {
     return this.currentInput.length > 0;
   }
 
-  hasReachedGuessLimit(): boolean {
+  currentInputIsEmpty() {
+    return this.currentInput.length === 0;
+  }
+
+  hasReachedGuessLimit() {
     return this.guessHistory.length >= 6;
   }
 
-  hasWon(): boolean {
+  hasNotReachedGuessLimit() {
+    return this.guessHistory.length < 6;
+  }
+
+  hasWon() {
     return this.correctWord === this.getLastGuessAsString();
   }
 
-  hasLost(): boolean {
+  hasLost() {
     return (
       this.hasReachedGuessLimit() &&
       this.correctWord !== this.getLastGuessAsString()
@@ -135,7 +147,7 @@ class Model {
 
   acceptCurrentInput() {
     if (!this.mayCurrentInputBeAccepted()) {
-      return;
+      return; // TODO error?
     }
     const guess = this.getCurrentInputAsGuess();
     this.guessHistory.push(guess);
@@ -164,8 +176,8 @@ class Model {
   }
 
   deleteLetter() {
-    if (!this.mayDeleteLetter()) {
-      return;
+    if (!this.currentInputNotEmpty()) {
+      return; // TODO error?
     }
     this.currentInput = this.currentInput.slice(
       0,
@@ -175,11 +187,11 @@ class Model {
   }
 
   addLetter(letter: Letter) {
-    if (!this.mayAddLetter()) {
-      return;
+    if (!this.currentInputNotFull()) {
+      return; // TODO error?
     }
     if (this.hasReachedGuessLimit()) {
-      return;
+      return; // TODO error?
     }
     this.currentInput += letter;
     this.onModelChanged(this);
@@ -210,7 +222,7 @@ function chooseBetterLetterStatus(
 async function loadLegalWordsAsync() {
   const response = await fetch("./valid-wordle-words.txt");
   if (!response.ok) {
-    throw new Error("Could not read legal words file");
+    throw new Error("Could not read legal words file.");
   }
   return (await response.text()).split("\n").map((x) => x.toUpperCase());
 }
@@ -227,26 +239,26 @@ function performWordleComparison(
   inputWord: string,
   correctWord: string
 ): Guess {
-  const result: Guess = [];
+  const guess: Guess = [];
   const inputLetters = inputWord.split("") as Letter[];
   const correctLetters = correctWord.split("") as (Letter | null)[];
-  for (let i = 0; i < inputLetters.length; i++) {
-    const inputLetter = inputLetters[i] as Letter;
+  inputLetters.forEach((inputLetter, i) => {
     const correctChar = correctWord[i];
+    const resultPart = { letter: inputLetter };
     if (inputLetter === correctChar) {
-      result.push({ letter: inputLetter, status: "green" });
+      guess.push({ ...resultPart, status: "green" });
       correctLetters[i] = null;
     } else {
       const solutionIndex = correctLetters.indexOf(inputLetter);
       if (solutionIndex !== -1) {
-        result.push({ letter: inputLetter, status: "yellow" });
+        guess.push({ ...resultPart, status: "yellow" });
         correctLetters[solutionIndex] = null;
       } else {
-        result.push({ letter: inputLetter, status: "grey" });
+        guess.push({ ...resultPart, status: "grey" });
       }
     }
-  }
-  return result;
+  });
+  return guess;
 }
 
 // =======================================================================
@@ -436,10 +448,9 @@ class Controller {
 
   constructor(model: Model, view: View) {
     this.model = model;
-    this.view = view;
-
     this.model.bindModelChanged(this.onModelChanged);
 
+    this.view = view;
     this.view.bindClickVirtualKeyboard(this.handleKeypress);
     this.view.bindKeyPressOnPhysicalKeyboard(this.handleKeypress);
 
@@ -461,7 +472,7 @@ class Controller {
   };
 
   handleAddLetter = (letter: Letter) => {
-    if (!this.model.mayAddLetter()) {
+    if (this.model.currentInputIsFull()) {
       return;
     }
     if (this.model.hasReachedGuessLimit()) {
@@ -471,7 +482,7 @@ class Controller {
   };
 
   handleDeleteLetter = () => {
-    if (!this.model.mayDeleteLetter()) {
+    if (this.model.currentInputIsEmpty()) {
       return;
     }
     this.model.deleteLetter();

@@ -14,8 +14,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 // =======================================================================
 // Model
 // * stores state
-// * provides data derived from state
-// * does not modify self
+// * provides derivative data (e.g. number of guesses)
+// * modifies self
 // =======================================================================
 class Model {
     // TODO (later): separate into:
@@ -43,14 +43,23 @@ class Model {
         return (this.currentInput.length === 5 &&
             this.legalWords.includes(this.currentInput));
     }
-    mayAddLetter() {
+    currentInputNotFull() {
         return this.currentInput.length < 5;
     }
-    mayDeleteLetter() {
+    currentInputIsFull() {
+        return this.currentInput.length >= 5;
+    }
+    currentInputNotEmpty() {
         return this.currentInput.length > 0;
+    }
+    currentInputIsEmpty() {
+        return this.currentInput.length === 0;
     }
     hasReachedGuessLimit() {
         return this.guessHistory.length >= 6;
+    }
+    hasNotReachedGuessLimit() {
+        return this.guessHistory.length < 6;
     }
     hasWon() {
         return this.correctWord === this.getLastGuessAsString();
@@ -76,7 +85,7 @@ class Model {
     // modify self
     acceptCurrentInput() {
         if (!this.mayCurrentInputBeAccepted()) {
-            return;
+            return; // TODO error?
         }
         const guess = this.getCurrentInputAsGuess();
         this.guessHistory.push(guess);
@@ -99,18 +108,18 @@ class Model {
         this.onModelChanged(this);
     }
     deleteLetter() {
-        if (!this.mayDeleteLetter()) {
-            return;
+        if (!this.currentInputNotEmpty()) {
+            return; // TODO error?
         }
         this.currentInput = this.currentInput.slice(0, this.currentInput.length - 1);
         this.onModelChanged(this);
     }
     addLetter(letter) {
-        if (!this.mayAddLetter()) {
-            return;
+        if (!this.currentInputNotFull()) {
+            return; // TODO error?
         }
         if (this.hasReachedGuessLimit()) {
-            return;
+            return; // TODO error?
         }
         this.currentInput += letter;
         this.onModelChanged(this);
@@ -137,7 +146,7 @@ function loadLegalWordsAsync() {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield fetch("./valid-wordle-words.txt");
         if (!response.ok) {
-            throw new Error("Could not read legal words file");
+            throw new Error("Could not read legal words file.");
         }
         return (yield response.text()).split("\n").map((x) => x.toUpperCase());
     });
@@ -150,28 +159,28 @@ function createKeyboardStatus() {
     return map;
 }
 function performWordleComparison(inputWord, correctWord) {
-    const result = [];
+    const guess = [];
     const inputLetters = inputWord.split("");
     const correctLetters = correctWord.split("");
-    for (let i = 0; i < inputLetters.length; i++) {
-        const inputLetter = inputLetters[i];
+    inputLetters.forEach((inputLetter, i) => {
         const correctChar = correctWord[i];
+        const resultPart = { letter: inputLetter };
         if (inputLetter === correctChar) {
-            result.push({ letter: inputLetter, status: "green" });
+            guess.push(Object.assign(Object.assign({}, resultPart), { status: "green" }));
             correctLetters[i] = null;
         }
         else {
             const solutionIndex = correctLetters.indexOf(inputLetter);
             if (solutionIndex !== -1) {
-                result.push({ letter: inputLetter, status: "yellow" });
+                guess.push(Object.assign(Object.assign({}, resultPart), { status: "yellow" }));
                 correctLetters[solutionIndex] = null;
             }
             else {
-                result.push({ letter: inputLetter, status: "grey" });
+                guess.push(Object.assign(Object.assign({}, resultPart), { status: "grey" }));
             }
         }
-    }
-    return result;
+    });
+    return guess;
 }
 // =======================================================================
 // View
@@ -351,7 +360,7 @@ class Controller {
             }
         };
         this.handleAddLetter = (letter) => {
-            if (!this.model.mayAddLetter()) {
+            if (this.model.currentInputIsFull()) {
                 return;
             }
             if (this.model.hasReachedGuessLimit()) {
@@ -360,7 +369,7 @@ class Controller {
             this.model.addLetter(letter);
         };
         this.handleDeleteLetter = () => {
-            if (!this.model.mayDeleteLetter()) {
+            if (this.model.currentInputIsEmpty()) {
                 return;
             }
             this.model.deleteLetter();
@@ -372,8 +381,8 @@ class Controller {
             this.model.acceptCurrentInput();
         };
         this.model = model;
-        this.view = view;
         this.model.bindModelChanged(this.onModelChanged);
+        this.view = view;
         this.view.bindClickVirtualKeyboard(this.handleKeypress);
         this.view.bindKeyPressOnPhysicalKeyboard(this.handleKeypress);
         this.onModelChanged(this.model);
