@@ -49,7 +49,9 @@ type KeyboardStatusMap = Map<Letter, KeyboardKeyStatus>;
 // Constants
 // =======================================================================
 
+// keep these in sync with CSS
 const SHAKE_DURATION = 500;
+const INPUTTING_DURATION = 200;
 
 // =======================================================================
 // Model
@@ -362,6 +364,10 @@ class View {
         const guessIndex = model.guessHistory.length;
         const element = letterToTileElement(letter);
         element.classList.add("current-input");
+        const isLastInput = model.currentInput.length - 1 === letterIndex;
+        if (isLastInput) {
+          element.classList.add("last-input");
+        }
         element.id = "tile-" + guessIndex + "-" + letterIndex;
         this.tileGridRoot.appendChild(element);
       });
@@ -431,6 +437,24 @@ class View {
         tile.classList.remove("shaking");
       }, durationInMs);
     });
+  }
+
+  pop(tile: HTMLElement, durationInMs: number) {
+    tile.classList.add("inputting");
+    setTimeout(() => {
+      tile.classList.remove("inputting");
+    }, durationInMs);
+  }
+
+  popLastTile() {
+    const tile = document.querySelector("div.tile.last-input");
+    if (tile !== null && tile instanceof HTMLElement) {
+      this.pop(tile, INPUTTING_DURATION);
+    }
+  }
+
+  getTile(guessIndex: number, letterIndex: number) {
+    return document.getElementById(`tile-${guessIndex}-${letterIndex}`);
   }
 }
 
@@ -532,6 +556,7 @@ class Controller {
       return;
     }
     this.model.addLetter(letter);
+    this.view.popLastTile();
   };
 
   handleDeleteLetter = () => {

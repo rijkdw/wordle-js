@@ -13,7 +13,7 @@
   --lgrey: #7f8182;
   /* Durations */
   --shake-duration: 500ms;
-  --inputting-duration: 100ms;
+  --inputting-duration: 200ms;
 }
 
 * {
