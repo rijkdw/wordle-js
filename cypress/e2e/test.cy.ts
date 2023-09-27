@@ -1,5 +1,6 @@
 import {
   clickVirtualKey,
+  expectUiIsIntact,
   getTile,
   getVirtualKey,
   inputGuessAndHitEnter,
@@ -24,6 +25,8 @@ describe("Input", () => {
     expect(getTile(0, 2).contains("L"));
     expect(getTile(0, 3).contains("L"));
     expect(getTile(0, 4).contains("O"));
+
+    expectUiIsIntact();
   });
 
   it("with physical keyboard", () => {
@@ -41,6 +44,8 @@ describe("Input", () => {
     expect(getTile(0, 2).contains("L"));
     expect(getTile(0, 3).contains("L"));
     expect(getTile(0, 4).contains("O"));
+
+    expectUiIsIntact();
   });
 
   const naturalTypingSubroutine = (inputFunction: (key: string) => void) => {
@@ -81,6 +86,8 @@ describe("Input", () => {
     expect(getTile(0, 2).contains("L"));
     expect(getTile(0, 3).should("not.contain", "L"));
     expect(getTile(0, 4).should("not.contain", "A"));
+
+    expectUiIsIntact();
   };
 
   it("natural typing with physical keyboard", () => {
@@ -107,6 +114,8 @@ describe("Keyboard colors change", () => {
     expect(getVirtualKey("R").should("have.class", "unused"));
     expect(getVirtualKey("T").should("have.class", "unused"));
     expect(getVirtualKey("X").should("have.class", "unused"));
+
+    expectUiIsIntact();
   });
 
   it("for multiple guesses", () => {
@@ -184,6 +193,8 @@ describe("Keyboard colors change", () => {
     keyStates.forEach(([key, state]) => {
       expect(keyIsColor(key, state));
     });
+
+    expectUiIsIntact();
   });
 });
 
@@ -195,6 +206,8 @@ describe("Tile colors change", () => {
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(0, letterIndex), color));
     });
+
+    expectUiIsIntact();
   });
 
   it("for multiple guesses", () => {
@@ -224,6 +237,8 @@ describe("Tile colors change", () => {
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(3, letterIndex), color));
     });
+
+    expectUiIsIntact();
   });
 
   it("for incomplete inputs", () => {
@@ -236,6 +251,8 @@ describe("Tile colors change", () => {
     expect(getTile(0, 2).should("have.class", "inputted"));
     expect(getTile(0, 3).should("not.have.class", "inputted"));
     expect(getTile(0, 4).should("not.have.class", "inputted"));
+
+    expectUiIsIntact();
   });
 });
 
@@ -251,6 +268,8 @@ describe("Robustness", () => {
       expect(getTile(1, letterIndex).should("not.contain", letter));
       expect(getTile(1, letterIndex).should("not.have.class", "grey"));
     });
+
+    expectUiIsIntact();
   });
 
   it("does not allow more input after winning", () => {
@@ -276,6 +295,8 @@ describe("Robustness", () => {
 
     typePhysicalLetter("X");
     expect(getTile(2, 0).should("not.contain", "X"));
+
+    expectUiIsIntact();
   });
 });
 

@@ -55,3 +55,16 @@ export function tileIsColor(
 ) {
   return tile.should("have.class", color);
 }
+
+export function expectUiIsIntact() {
+  expectAllTilesExist();
+}
+
+function expectAllTilesExist() {
+  for (let guessIndex = 0; guessIndex < 6; guessIndex++) {
+    for (let letterIndex = 0; letterIndex < 5; letterIndex++) {
+      const tile = getTile(guessIndex, letterIndex);
+      expect(tile.should("exist"));
+    }
+  }
+}
