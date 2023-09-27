@@ -42,6 +42,54 @@ describe("Input", () => {
     expect(getTile(0, 3).contains("L"));
     expect(getTile(0, 4).contains("O"));
   });
+
+  const naturalTypingSubroutine = (inputFunction: (key: string) => void) => {
+    cy.visit("http://localhost:8000");
+
+    inputFunction("H"); // H
+    expect(getTile(0, 0).contains("H"));
+    inputFunction("E"); // HE
+    expect(getTile(0, 1).contains("E"));
+    inputFunction("L"); // HEL
+    expect(getTile(0, 2).contains("L"));
+    inputFunction("L"); // HELL
+    expect(getTile(0, 3).contains("L"));
+    inputFunction("O"); // HELLO
+    expect(getTile(0, 4).contains("O"));
+
+    inputFunction("BACKSPACE");
+    // HELL
+    expect(getTile(0, 0).contains("H"));
+    expect(getTile(0, 1).contains("E"));
+    expect(getTile(0, 2).contains("L"));
+    expect(getTile(0, 3).contains("L"));
+    expect(getTile(0, 4).should("not.contain", "O"));
+
+    inputFunction("A");
+    // HELLA
+    expect(getTile(0, 0).contains("H"));
+    expect(getTile(0, 1).contains("E"));
+    expect(getTile(0, 2).contains("L"));
+    expect(getTile(0, 3).contains("L"));
+    expect(getTile(0, 4).contains("A"));
+
+    inputFunction("BACKSPACE");
+    inputFunction("BACKSPACE");
+    // HEL
+    expect(getTile(0, 0).contains("H"));
+    expect(getTile(0, 1).contains("E"));
+    expect(getTile(0, 2).contains("L"));
+    expect(getTile(0, 3).should("not.contain", "L"));
+    expect(getTile(0, 4).should("not.contain", "A"));
+  };
+
+  it("natural typing with physical keyboard", () => {
+    naturalTypingSubroutine(typePhysicalLetter);
+  });
+
+  it("natural typing with virtual keyboard", () => {
+    naturalTypingSubroutine(clickVirtualKey);
+  });
 });
 
 describe("Keyboard colors change", () => {
@@ -176,6 +224,18 @@ describe("Tile colors change", () => {
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(3, letterIndex), color));
     });
+  });
+
+  it("for incomplete inputs", () => {
+    cy.visit("http://localhost:8000");
+    typePhysicalLetter("A");
+    typePhysicalLetter("B");
+    typePhysicalLetter("C");
+    expect(getTile(0, 0).should("have.class", "inputted"));
+    expect(getTile(0, 1).should("have.class", "inputted"));
+    expect(getTile(0, 2).should("have.class", "inputted"));
+    expect(getTile(0, 3).should("not.have.class", "inputted"));
+    expect(getTile(0, 4).should("not.have.class", "inputted"));
   });
 });
 

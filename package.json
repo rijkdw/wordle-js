@@ -5,8 +5,8 @@
   "main": "script.js",
   "scripts": {
     "start": "python -m http.server 8000",
-    "cy:open": "cypress open",
-    "cy:run": "cypress run"
+    "open-e2e": "tsc && cypress open",
+    "test-e2e": "tsc && cypress run"
   },
   "keywords": [],
   "author": "",
