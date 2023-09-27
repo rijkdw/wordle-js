@@ -6,7 +6,7 @@ import {
   keyIsColor,
   tileIsColor,
   typePhysicalLetter,
-} from "./helpers";
+} from "./test-helpers";
 
 describe("Input", () => {
   it("with virtual keyboard", () => {
@@ -175,6 +175,24 @@ describe("Tile colors change", () => {
     expectedColors = ["green", "green", "green", "green", "green"];
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(3, letterIndex), color));
+    });
+  });
+});
+
+describe("Word selection via URL", () => {
+  it("defaults to HELLO", () => {
+    cy.visit("http://localhost:8000");
+    inputGuessAndHitEnter("HELLO", "physically");
+    [0, 1, 2, 3, 4].forEach((letterIndex) => {
+      expect(tileIsColor(getTile(0, letterIndex), "green"));
+    });
+  });
+
+  it("can be set", () => {
+    cy.visit("http://localhost:8000?word=WORLD");
+    inputGuessAndHitEnter("WORLD", "physically");
+    [0, 1, 2, 3, 4].forEach((letterIndex) => {
+      expect(tileIsColor(getTile(0, letterIndex), "green"));
     });
   });
 });

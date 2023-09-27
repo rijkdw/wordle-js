@@ -489,6 +489,11 @@ class Controller {
 // Startup
 // =======================================================================
 
-const model = new Model("WHISK");
+const searchParams = new URLSearchParams(window.location.search);
+let word = searchParams.get("word");
+if (word === null) {
+  word = "HELLO";
+}
+const model = new Model(word);
 const view = new View();
-const app = new Controller(model, view);
+const controller = new Controller(model, view);
