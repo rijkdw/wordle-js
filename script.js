@@ -239,6 +239,7 @@ class View {
             this.tileGridRoot.removeChild(this.tileGridRoot.firstChild);
         }
         // repopulate the grid
+        // 1. the past guesses
         model.guessHistory.forEach((guess, guessIndex) => {
             guess.forEach((letterData, letterIndex) => {
                 const element = letterDataToTileElement(letterData);
@@ -246,9 +247,11 @@ class View {
                 this.tileGridRoot.appendChild(element);
             });
         });
+        // 1.a stop if six guesses
         if (model.hasReachedGuessLimit()) {
             return;
         }
+        // 2. the current input
         model
             .getCurrentInputPadded()
             .split("")
@@ -258,44 +261,52 @@ class View {
             element.id = "tile-" + guessIndex + "-" + letterIndex;
             this.tileGridRoot.appendChild(element);
         });
-        const emptyTilesToFill = 5 - model.guessHistory.length;
-        for (let i = 0; i < emptyTilesToFill; i++) {
-            "     ".split("").forEach((letter, letterIndex) => {
-                const guessIndex = model.guessHistory.length + 1;
-                const element = letterToTileElement(letter);
+        // 3. the remaing empty rows
+        const numEmptyRowsToFill = 5 - model.guessHistory.length;
+        for (let emptyRowIndex = 0; emptyRowIndex < numEmptyRowsToFill; emptyRowIndex++) {
+            for (let letterIndex = 0; letterIndex < 5; letterIndex++) {
+                const guessIndex = model.guessHistory.length + emptyRowIndex + 1;
+                const element = letterToTileElement(" ");
                 element.id = "tile-" + guessIndex + "-" + letterIndex;
                 this.tileGridRoot.appendChild(element);
-            });
+            }
         }
     }
     renderKeyboard(model) {
+        const createEmptyKeyboardRow = (rowNum) => {
+            const rowElement = document.createElement("div");
+            rowElement.classList.add("keyboard-row");
+            rowElement.classList.add("row-" + (rowNum + 1));
+            rowElement.id = "keyboard-row-" + (rowNum + 1);
+            return rowElement;
+        };
+        const createKeyboardKey = (keyData) => {
+            const keyElement = document.createElement("div");
+            keyElement.id = "key-" + keyData.face;
+            keyElement.classList.add("keyboard-key");
+            keyElement.classList.add(keyData.status);
+            if (keyData.face === "ENTER") {
+                keyElement.classList.add("wide");
+                keyElement.classList.add("enter");
+            }
+            else if (keyData.face === "BACKSPACE") {
+                keyElement.classList.add("wide");
+                keyElement.classList.add("backspace");
+            }
+            const p = document.createElement("p");
+            p.innerHTML = keyData.face === "BACKSPACE" ? "<" : keyData.face;
+            keyElement.appendChild(p);
+            return keyElement;
+        };
         while (this.keyboardRoot.firstChild) {
             this.keyboardRoot.removeChild(this.keyboardRoot.firstChild);
         }
         const keyboardLayout = createKeyboardLayout(model.keyboardStatus);
-        keyboardLayout.forEach((row, i) => {
-            const rowElement = document.createElement("div");
-            rowElement.classList.add("keyboard-row");
-            rowElement.classList.add("row-" + (i + 1));
-            rowElement.id = "keyboard-row-" + (i + 1);
-            for (const keyData of row) {
-                const keyElement = document.createElement("div");
-                keyElement.id = "key-" + keyData.face;
-                keyElement.classList.add("keyboard-key");
-                keyElement.classList.add(keyData.status);
-                if (keyData.face === "ENTER") {
-                    keyElement.classList.add("wide");
-                    keyElement.classList.add("enter");
-                }
-                else if (keyData.face === "BACKSPACE") {
-                    keyElement.classList.add("wide");
-                    keyElement.classList.add("backspace");
-                }
-                const p = document.createElement("p");
-                p.innerHTML = keyData.face === "BACKSPACE" ? "<" : keyData.face;
-                keyElement.appendChild(p);
+        keyboardLayout.forEach((row, rowNum) => {
+            const rowElement = createEmptyKeyboardRow(rowNum);
+            row.map(createKeyboardKey).forEach((keyElement) => {
                 rowElement.appendChild(keyElement);
-            }
+            });
             this.keyboardRoot.appendChild(rowElement);
         });
     }

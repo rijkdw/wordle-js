@@ -5,7 +5,8 @@
   "main": "script.js",
   "scripts": {
     "start": "python -m http.server 8000",
-    "e2e": "tsc && for browser in chrome electron firefox; do echo \"Testing $browser\"; cypress run --browser $browser; done"
+    "e2e-all": "tsc && for browser in chrome electron firefox; do echo \"Testing $browser\"; cypress run --browser $browser; done",
+    "e2e": "tsc && cypress run --browser electron"
   },
   "keywords": [],
   "author": "",
