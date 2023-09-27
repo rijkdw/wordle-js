@@ -545,6 +545,9 @@ class Controller {
   };
 
   handleSubmit = () => {
+    if (this.isLocked) {
+      return;
+    }
     if (!this.model.mayCurrentInputBeAccepted() && !this.model.hasWon()) {
       this.view.shake(SHAKE_DURATION);
       this.lock(SHAKE_DURATION);
