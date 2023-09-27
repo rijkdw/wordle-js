@@ -46,6 +46,12 @@ type KeyboardKeyData = {
 type KeyboardStatusMap = Map<Letter, KeyboardKeyStatus>;
 
 // =======================================================================
+// Constants
+// =======================================================================
+
+const SHAKE_DURATION = 500;
+
+// =======================================================================
 // Model
 // * stores state
 // * provides derivative data (e.g. number of guesses)
@@ -115,14 +121,18 @@ class Model {
   }
 
   hasWon() {
+    return this.lastGuessMatchesCorrectWord();
+  }
+
+  lastGuessMatchesCorrectWord() {
+    if (this.getLastGuessAsString() === undefined) {
+      return false;
+    }
     return this.correctWord === this.getLastGuessAsString();
   }
 
   hasLost() {
-    return (
-      this.hasReachedGuessLimit() &&
-      this.correctWord !== this.getLastGuessAsString()
-    );
+    return this.hasReachedGuessLimit() && !this.lastGuessMatchesCorrectWord();
   }
 
   isGameOver() {
@@ -137,7 +147,10 @@ class Model {
     return this.currentInput.padEnd(5, " ");
   }
 
-  getLastGuessAsString(): string {
+  getLastGuessAsString(): string | undefined {
+    if (this.guessHistory.length === 0) {
+      return undefined;
+    }
     return this.guessHistory[this.guessHistory.length - 1]
       .map((x) => x.letter)
       .join("");
@@ -348,6 +361,7 @@ class View {
       .forEach((letter, letterIndex) => {
         const guessIndex = model.guessHistory.length;
         const element = letterToTileElement(letter);
+        element.classList.add("current-input");
         element.id = "tile-" + guessIndex + "-" + letterIndex;
         this.tileGridRoot.appendChild(element);
       });
@@ -408,6 +422,16 @@ class View {
       this.keyboardRoot.appendChild(rowElement);
     });
   }
+
+  shake(durationInMs: number) {
+    const inputtedTiles = document.querySelectorAll("div.tile.current-input");
+    inputtedTiles.forEach((tile) => {
+      tile.classList.add("shaking");
+      setTimeout(() => {
+        tile.classList.remove("shaking");
+      }, durationInMs);
+    });
+  }
 }
 
 // -----------------------------------------------------------------------
@@ -464,6 +488,7 @@ function createKeyboardLayout(
 class Controller {
   model: Model;
   view: View;
+  isLocked: boolean = false;
 
   constructor(model: Model, view: View) {
     this.model = model;
@@ -481,6 +506,9 @@ class Controller {
   };
 
   handleKeypress = (letter: KeyboardKeyLetter) => {
+    if (this.isLocked) {
+      return;
+    }
     if (letter === "ENTER") {
       this.handleSubmit();
     } else if (letter === "BACKSPACE") {
@@ -491,16 +519,25 @@ class Controller {
   };
 
   handleAddLetter = (letter: Letter) => {
+    if (this.isLocked) {
+      return;
+    }
     if (this.model.currentInputIsFull()) {
       return;
     }
     if (this.model.hasReachedGuessLimit()) {
       return;
     }
+    if (this.model.hasWon()) {
+      return;
+    }
     this.model.addLetter(letter);
   };
 
   handleDeleteLetter = () => {
+    if (this.isLocked) {
+      return;
+    }
     if (this.model.currentInputIsEmpty()) {
       return;
     }
@@ -508,11 +545,19 @@ class Controller {
   };
 
   handleSubmit = () => {
-    if (!this.model.mayCurrentInputBeAccepted()) {
-      return;
+    if (!this.model.mayCurrentInputBeAccepted() && !this.model.hasWon()) {
+      this.view.shake(SHAKE_DURATION);
+      this.lock(SHAKE_DURATION);
     }
     this.model.acceptCurrentInput();
   };
+
+  lock(durationInMs: number) {
+    this.isLocked = true;
+    setTimeout(() => {
+      this.isLocked = false;
+    }, durationInMs);
+  }
 }
 
 // =======================================================================

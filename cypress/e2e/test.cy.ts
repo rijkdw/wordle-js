@@ -252,6 +252,31 @@ describe("Robustness", () => {
       expect(getTile(1, letterIndex).should("not.have.class", "grey"));
     });
   });
+
+  it("does not allow more input after winning", () => {
+    cy.visit("http://localhost:8000?word=HELLO");
+
+    inputGuessAndHitEnter("MAGIC", "physically");
+    expect(getTile(0, 0).should("contain", "M"));
+    expect(getTile(0, 1).should("contain", "A"));
+    expect(getTile(0, 2).should("contain", "G"));
+    expect(getTile(0, 3).should("contain", "I"));
+    expect(getTile(0, 4).should("contain", "C"));
+
+    typePhysicalLetter("X");
+    expect(getTile(1, 0).should("contain", "X"));
+
+    typePhysicalLetter("BACKSPACE");
+    inputGuessAndHitEnter("HELLO", "physically");
+    expect(getTile(1, 0).should("contain", "H"));
+    expect(getTile(1, 1).should("contain", "E"));
+    expect(getTile(1, 2).should("contain", "L"));
+    expect(getTile(1, 3).should("contain", "L"));
+    expect(getTile(1, 4).should("contain", "O"));
+
+    typePhysicalLetter("X");
+    expect(getTile(2, 0).should("not.contain", "X"));
+  });
 });
 
 describe("Word selection via URL", () => {

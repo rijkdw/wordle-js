@@ -12,6 +12,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 // =======================================================================
+// Constants
+// =======================================================================
+const SHAKE_DURATION = 500;
+// =======================================================================
 // Model
 // * stores state
 // * provides derivative data (e.g. number of guesses)
@@ -62,11 +66,16 @@ class Model {
         return this.guessHistory.length < 6;
     }
     hasWon() {
+        return this.lastGuessMatchesCorrectWord();
+    }
+    lastGuessMatchesCorrectWord() {
+        if (this.getLastGuessAsString() === undefined) {
+            return false;
+        }
         return this.correctWord === this.getLastGuessAsString();
     }
     hasLost() {
-        return (this.hasReachedGuessLimit() &&
-            this.correctWord !== this.getLastGuessAsString());
+        return this.hasReachedGuessLimit() && !this.lastGuessMatchesCorrectWord();
     }
     isGameOver() {
         return this.hasReachedGuessLimit();
@@ -78,6 +87,9 @@ class Model {
         return this.currentInput.padEnd(5, " ");
     }
     getLastGuessAsString() {
+        if (this.guessHistory.length === 0) {
+            return undefined;
+        }
         return this.guessHistory[this.guessHistory.length - 1]
             .map((x) => x.letter)
             .join("");
@@ -258,6 +270,7 @@ class View {
             .forEach((letter, letterIndex) => {
             const guessIndex = model.guessHistory.length;
             const element = letterToTileElement(letter);
+            element.classList.add("current-input");
             element.id = "tile-" + guessIndex + "-" + letterIndex;
             this.tileGridRoot.appendChild(element);
         });
@@ -310,6 +323,15 @@ class View {
             this.keyboardRoot.appendChild(rowElement);
         });
     }
+    shake(durationInMs) {
+        const inputtedTiles = document.querySelectorAll("div.tile.current-input");
+        inputtedTiles.forEach((tile) => {
+            tile.classList.add("shaking");
+            setTimeout(() => {
+                tile.classList.remove("shaking");
+            }, durationInMs);
+        });
+    }
 }
 // -----------------------------------------------------------------------
 // View helpers
@@ -356,10 +378,14 @@ function createKeyboardLayout(keyboardStatus) {
 // =======================================================================
 class Controller {
     constructor(model, view) {
+        this.isLocked = false;
         this.onModelChanged = (model) => {
             this.view.render(model);
         };
         this.handleKeypress = (letter) => {
+            if (this.isLocked) {
+                return;
+            }
             if (letter === "ENTER") {
                 this.handleSubmit();
             }
@@ -371,23 +397,33 @@ class Controller {
             }
         };
         this.handleAddLetter = (letter) => {
+            if (this.isLocked) {
+                return;
+            }
             if (this.model.currentInputIsFull()) {
                 return;
             }
             if (this.model.hasReachedGuessLimit()) {
                 return;
             }
+            if (this.model.hasWon()) {
+                return;
+            }
             this.model.addLetter(letter);
         };
         this.handleDeleteLetter = () => {
+            if (this.isLocked) {
+                return;
+            }
             if (this.model.currentInputIsEmpty()) {
                 return;
             }
             this.model.deleteLetter();
         };
         this.handleSubmit = () => {
-            if (!this.model.mayCurrentInputBeAccepted()) {
-                return;
+            if (!this.model.mayCurrentInputBeAccepted() && !this.model.hasWon()) {
+                this.view.shake(SHAKE_DURATION);
+                this.lock(SHAKE_DURATION);
             }
             this.model.acceptCurrentInput();
         };
@@ -397,6 +433,12 @@ class Controller {
         this.view.bindClickVirtualKeyboard(this.handleKeypress);
         this.view.bindKeyPressOnPhysicalKeyboard(this.handleKeypress);
         this.onModelChanged(this.model);
+    }
+    lock(durationInMs) {
+        this.isLocked = true;
+        setTimeout(() => {
+            this.isLocked = false;
+        }, durationInMs);
     }
 }
 // =======================================================================
