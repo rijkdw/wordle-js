@@ -12,8 +12,10 @@
   --mgrey: #565758;
   --lgrey: #7f8182;
   /* Durations */
-  --shake-duration: 500ms;
-  --inputting-duration: 200ms;
+  --shake-duration: 600ms;
+  --shake-left: -0.3rem;
+  --shake-right: 0.3rem;
+  --inputting-duration: 100ms;
 }
 
 * {
@@ -95,32 +97,22 @@ header {
 }
 
 @keyframes shaking {
-  from {
-    transform: translate(0);
+  10%,
+  90% {
+    transform: translateX(-0.1rem);
   }
-
-  16.66% {
-    transform: translate(1rem);
+  20%,
+  80% {
+    transform: translateX(0.2rem);
   }
-
-  33.33% {
-    transform: translate(-1rem);
+  30%,
+  50%,
+  70% {
+    transform: translateX(-0.4rem);
   }
-
-  50% {
-    transform: translate(1rem);
-  }
-
-  66.66% {
-    transform: translate(-1rem);
-  }
-
-  83.33% {
-    transform: translate(1rem);
-  }
-
-  to {
-    transform: translate(0);
+  40%,
+  60% {
+    transform: translateX(0.4rem);
   }
 }
 
@@ -151,8 +143,16 @@ header {
     transform: scale(1);
   }
 
-  50% {
-    transform: scale(0.9);
+  10% {
+    transform: scale(0.905);
+  }
+
+  20% {
+    transform: scale(1);
+  }
+
+  66% {
+    transform: scale(1.1);
   }
 
   to {

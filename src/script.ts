@@ -50,8 +50,8 @@ type KeyboardStatusMap = Map<Letter, KeyboardKeyStatus>;
 // =======================================================================
 
 // keep these in sync with CSS
-const SHAKE_DURATION = 500;
-const INPUTTING_DURATION = 200;
+const SHAKE_DURATION = 600;
+const INPUTTING_DURATION = 100;
 
 // =======================================================================
 // Model

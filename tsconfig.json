@@ -11,6 +11,7 @@
     "strict": true,
     "skipLibCheck": true,
     "outDir": ".",
+    "removeComments": true
   },
   "include": [
     "src/**/*.ts",

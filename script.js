@@ -1,7 +1,4 @@
 "use strict";
-// =======================================================================
-// Types
-// =======================================================================
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -11,22 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-// =======================================================================
-// Constants
-// =======================================================================
-// keep these in sync with CSS
-const SHAKE_DURATION = 500;
-const INPUTTING_DURATION = 200;
-// =======================================================================
-// Model
-// * stores state
-// * provides derivative data (e.g. number of guesses)
-// * modifies self
-// =======================================================================
+const SHAKE_DURATION = 600;
+const INPUTTING_DURATION = 100;
 class Model {
-    // TODO (later): separate into:
-    // 1. onInputChanged, for when the user types something
-    // 2. onInputAccepted, for when the user successfully submits a guess
     constructor(correctWord, legalWords) {
         this.correctWord = correctWord;
         this.currentInput = "";
@@ -44,7 +28,6 @@ class Model {
     bindModelChanged(callback) {
         this.onModelChanged = callback;
     }
-    // derived data
     mayCurrentInputBeAccepted() {
         return (this.currentInput.length === 5 &&
             this.legalWords.includes(this.currentInput));
@@ -96,10 +79,9 @@ class Model {
             .map((x) => x.letter)
             .join("");
     }
-    // modify self
     acceptCurrentInput() {
         if (!this.mayCurrentInputBeAccepted()) {
-            return; // TODO error?
+            return;
         }
         const guess = this.getCurrentInputAsGuess();
         this.guessHistory.push(guess);
@@ -123,17 +105,17 @@ class Model {
     }
     deleteLetter() {
         if (!this.currentInputNotEmpty()) {
-            return; // TODO error?
+            return;
         }
         this.currentInput = this.currentInput.slice(0, this.currentInput.length - 1);
         this.onModelChanged(this);
     }
     addLetter(letter) {
         if (!this.currentInputNotFull()) {
-            return; // TODO error?
+            return;
         }
         if (this.hasReachedGuessLimit()) {
-            return; // TODO error?
+            return;
         }
         this.currentInput += letter;
         this.onModelChanged(this);
@@ -144,9 +126,6 @@ class Model {
         });
     }
 }
-// -----------------------------------------------------------------------
-// Model helpers
-// -----------------------------------------------------------------------
 function chooseBetterLetterStatus(a, b) {
     const indexMap = ["green", "yellow", "grey", "unused"];
     const aIndex = indexMap.indexOf(a);
@@ -196,9 +175,6 @@ function performWordleComparison(inputWord, correctWord) {
     });
     return guess;
 }
-// =======================================================================
-// View
-// =======================================================================
 class View {
     constructor() {
         this.tileGridRoot = document.querySelector("div#tilegrid");
@@ -248,12 +224,9 @@ class View {
         this.renderKeyboard(model);
     }
     renderTileGrid(model) {
-        // clear the grid
         while (this.tileGridRoot.firstChild) {
             this.tileGridRoot.removeChild(this.tileGridRoot.firstChild);
         }
-        // repopulate the grid
-        // 1. the past guesses
         model.guessHistory.forEach((guess, guessIndex) => {
             guess.forEach((letterData, letterIndex) => {
                 const element = letterDataToTileElement(letterData);
@@ -261,11 +234,9 @@ class View {
                 this.tileGridRoot.appendChild(element);
             });
         });
-        // 1.a stop if six guesses
         if (model.hasReachedGuessLimit()) {
             return;
         }
-        // 2. the current input
         model
             .getCurrentInputPadded()
             .split("")
@@ -280,7 +251,6 @@ class View {
             element.id = "tile-" + guessIndex + "-" + letterIndex;
             this.tileGridRoot.appendChild(element);
         });
-        // 3. the remaing empty rows
         const numEmptyRowsToFill = 5 - model.guessHistory.length;
         for (let emptyRowIndex = 0; emptyRowIndex < numEmptyRowsToFill; emptyRowIndex++) {
             for (let letterIndex = 0; letterIndex < 5; letterIndex++) {
@@ -354,9 +324,6 @@ class View {
         return document.getElementById(`tile-${guessIndex}-${letterIndex}`);
     }
 }
-// -----------------------------------------------------------------------
-// View helpers
-// -----------------------------------------------------------------------
 const KEYBOARD_LAYOUT_TEMPLATE = [
     "QWERTYUIOP".split(""),
     "ASDFGHJKL".split(""),
@@ -394,9 +361,6 @@ function createKeyboardLayout(keyboardStatus) {
         };
     }));
 }
-// =======================================================================
-// Controller
-// =======================================================================
 class Controller {
     constructor(model, view) {
         this.isLocked = false;
@@ -466,9 +430,6 @@ class Controller {
         }, durationInMs);
     }
 }
-// =======================================================================
-// Startup
-// =======================================================================
 const searchParams = new URLSearchParams(window.location.search);
 let word = searchParams.get("word");
 if (word === null) {
