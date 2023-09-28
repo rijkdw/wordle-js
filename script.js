@@ -12,6 +12,8 @@ const SHAKE_DURATION = 600;
 const INPUTTING_DURATION = 100;
 const FLIPPING_DURATION = 200;
 const FLIPPING_INTERVAL = 250;
+const BOUNCE_DURATION = 800;
+const BOUNCE_INTERVAL = 250;
 class Model {
     constructor(correctWord, legalWords) {
         this.correctWord = correctWord;
@@ -232,6 +234,10 @@ class View {
         model.guessHistory.forEach((guess, guessIndex) => {
             guess.forEach((letterData, letterIndex) => {
                 const element = letterDataToTileElement(letterData);
+                const isLastGuess = model.guessHistory.length - 1 === guessIndex;
+                if (isLastGuess) {
+                    element.classList.add("last-guess");
+                }
                 element.id = "tile-" + guessIndex + "-" + letterIndex;
                 this.tileGridRoot.appendChild(element);
             });
@@ -325,7 +331,7 @@ class View {
             this.pop(tile, INPUTTING_DURATION);
         }
     }
-    flip(guess) {
+    flipCurrentInputAndApplyColors(guess) {
         const tiles = document.querySelectorAll("div.tile.current-input");
         guess.forEach((letterData, i) => {
             const tile = tiles[i];
@@ -342,6 +348,18 @@ class View {
                 }, FLIPPING_DURATION * 2);
             };
             setTimeout(effect, FLIPPING_INTERVAL * i);
+        });
+    }
+    bounceLastGuess() {
+        const tiles = document.querySelectorAll("div.tile.last-guess");
+        tiles.forEach((tile, i) => {
+            const effect = () => {
+                tile.classList.add("bouncing");
+                setTimeout(() => {
+                    tile.classList.remove("bouncing");
+                }, BOUNCE_DURATION);
+            };
+            setTimeout(effect, BOUNCE_INTERVAL * i);
         });
     }
     getTile(guessIndex, letterIndex) {
@@ -439,10 +457,13 @@ class Controller {
                 this.lock(SHAKE_DURATION);
                 return;
             }
-            const guess = this.model.getCurrentInputAsGuess();
-            this.view.flip(guess);
+            this.view.flipCurrentInputAndApplyColors(this.model.getCurrentInputAsGuess());
             setTimeout(() => {
                 this.model.acceptCurrentInput();
+                if (this.model.hasWon()) {
+                    console.log("WON!");
+                    this.view.bounceLastGuess();
+                }
             }, FLIPPING_INTERVAL * 4 + FLIPPING_DURATION * 2);
         };
         this.model = model;

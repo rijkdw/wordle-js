@@ -17,6 +17,7 @@
   --shake-right: 0.3rem;
   --inputting-duration: 100ms;
   --flipping-duration: 200ms;
+  --bounce-duration: 800ms;
 }
 
 * {
@@ -176,6 +177,34 @@ header {
 
   to {
     transform: scale(1);
+  }
+}
+
+.bouncing {
+  animation-name: bouncing;
+  animation-duration: var(--bounce-duration);
+  /* TODO timing function */
+}
+
+@keyframes bouncing {
+  0%,
+  20% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-1.875rem);
+  }
+  50% {
+    transform: translateY(0.31rem);
+  }
+  60% {
+    transform: translateY(-0.95rem);
+  }
+  80% {
+    transform: translateY(0.125rem);
+  }
+  100% {
+    transform: translateY(0);
   }
 }
 
