@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const SHAKE_DURATION = 600;
 const INPUTTING_DURATION = 100;
 const FLIPPING_DURATION = 200;
-const FLIPPING_INTERVAL = 200;
+const FLIPPING_INTERVAL = 250;
 class Model {
     constructor(correctWord, legalWords) {
         this.correctWord = correctWord;

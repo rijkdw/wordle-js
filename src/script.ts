@@ -53,7 +53,7 @@ type KeyboardStatusMap = Map<Letter, KeyboardKeyStatus>;
 const SHAKE_DURATION = 600;
 const INPUTTING_DURATION = 100;
 const FLIPPING_DURATION = 200;
-const FLIPPING_INTERVAL = 200;
+const FLIPPING_INTERVAL = 250;
 
 // =======================================================================
 // Model
