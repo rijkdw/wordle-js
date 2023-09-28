@@ -11,11 +11,12 @@
   --dgrey: #3a3a3c;
   --mgrey: #565758;
   --lgrey: #7f8182;
-  /* Durations */
+  /* Animations */
   --shake-duration: 600ms;
   --shake-left: -0.3rem;
   --shake-right: 0.3rem;
   --inputting-duration: 100ms;
+  --flipping-duration: 200ms;
 }
 
 * {
@@ -116,19 +117,35 @@ header {
   }
 }
 
-.flipping {
-  animation-name: flipping;
-  animation-timing-function: ease-in;
-  animation-duration: 300ms;
+.flipping-down {
+  animation-name: flipping-down;
+  animation-timing-function: linear;
+  animation-duration: var(--flipping-duration);
 }
 
-@keyframes flipping {
+@keyframes flipping-down {
   from {
     transform: scaleY(1);
   }
 
   to {
     transform: scaleY(0);
+  }
+}
+
+.flipping-up {
+  animation-name: flipping-up;
+  animation-timing-function: linear;
+  animation-duration: var(--flipping-duration);
+}
+
+@keyframes flipping-up {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
   }
 }
 
@@ -234,4 +251,9 @@ header {
 
 .keyboard-key.enter p {
   font-size: 1rem;
+}
+
+/* Debugging */
+.debug {
+  background-color: red;
 }

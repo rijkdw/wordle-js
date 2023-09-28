@@ -52,6 +52,8 @@ type KeyboardStatusMap = Map<Letter, KeyboardKeyStatus>;
 // keep these in sync with CSS
 const SHAKE_DURATION = 600;
 const INPUTTING_DURATION = 100;
+const FLIPPING_DURATION = 200;
+const FLIPPING_INTERVAL = 200;
 
 // =======================================================================
 // Model
@@ -453,6 +455,26 @@ class View {
     }
   }
 
+  flip(guess: Guess) {
+    const tiles = document.querySelectorAll("div.tile.current-input");
+    guess.forEach((letterData, i) => {
+      const tile = tiles[i];
+      const effect = () => {
+        tile.classList.add("flipping-down");
+        setTimeout(() => {
+          tile.classList.remove("flipping-down");
+          tile.classList.remove("inputting");
+          tile.classList.add(letterData.status);
+          tile.classList.add("flipping-up");
+        }, FLIPPING_DURATION);
+        setTimeout(() => {
+          tile.classList.remove("flipping-up");
+        }, FLIPPING_DURATION * 2);
+      };
+      setTimeout(effect, FLIPPING_INTERVAL * i);
+    });
+  }
+
   getTile(guessIndex: number, letterIndex: number) {
     return document.getElementById(`tile-${guessIndex}-${letterIndex}`);
   }
@@ -576,8 +598,13 @@ class Controller {
     if (!this.model.mayCurrentInputBeAccepted() && !this.model.hasWon()) {
       this.view.shake(SHAKE_DURATION);
       this.lock(SHAKE_DURATION);
+      return;
     }
-    this.model.acceptCurrentInput();
+    const guess = this.model.getCurrentInputAsGuess();
+    this.view.flip(guess);
+    setTimeout(() => {
+      this.model.acceptCurrentInput();
+    }, FLIPPING_INTERVAL * 4 + FLIPPING_DURATION * 2);
   };
 
   lock(durationInMs: number) {
