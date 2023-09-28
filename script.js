@@ -284,6 +284,9 @@ class View {
                 keyElement.classList.add("wide");
                 keyElement.classList.add("backspace");
             }
+            else {
+                keyElement.classList.add("normal");
+            }
             const p = document.createElement("p");
             p.innerHTML = keyData.face === "BACKSPACE" ? "<" : keyData.face;
             keyElement.appendChild(p);
@@ -378,7 +381,7 @@ function createKeyboardLayout(keyboardStatus) {
         var _a;
         return {
             face: letter,
-            status: (_a = keyboardStatus.get(letter)) !== null && _a !== void 0 ? _a : "green",
+            status: (_a = keyboardStatus.get(letter)) !== null && _a !== void 0 ? _a : "unused",
         };
     }));
 }

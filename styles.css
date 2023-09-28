@@ -36,9 +36,13 @@ p {
 }
 
 header {
+  padding: 1rem 0;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #39393b;
   display: flex;
   justify-content: center;
-  font-size: 4rem;
+  font-size: 1.5rem;
+  font-weight: bold;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -49,28 +53,26 @@ header {
 /* The grid */
 
 .tilegrid {
-  --gap: 1rem;
-  max-width: 400px;
+  --gap: 0.3rem;
+  max-width: 340px;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   column-gap: var(--gap);
   grid-template-rows: repeat(6, 1fr);
   row-gap: var(--gap);
-  margin: 0 auto;
+  margin: 0 auto 3rem auto;
 }
 
 /* The tiles */
 
 .tile {
   background-color: var(--black);
-  border: 0.2rem solid var(--dgrey);
-  width: 100%;
-  height: 100%;
-  aspect-ratio: 1;
+  border: 0.15rem solid var(--dgrey);
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
+  aspect-ratio: 1;
 }
 
 .tile.inputted {
@@ -181,7 +183,7 @@ header {
 
 .tile p {
   color: white;
-  font-size: 2rem;
+  font-size: 1.7rem;
   font-weight: bold;
 }
 
@@ -194,7 +196,7 @@ header {
 .keyboard {
   display: grid;
   grid-template-rows: repeat(3, 1fr);
-  row-gap: 1rem;
+  row-gap: 0.6rem;
 }
 
 .keyboard-row {
@@ -205,14 +207,27 @@ header {
   gap: 0.4rem;
 }
 
+:root {
+  --keyboard-key-base-width: 2.7rem;
+}
+
 .keyboard-key {
   border-radius: 0.2rem;
   text-align: center;
-  width: 4rem;
+  width: var(--keyboard-key-base-width);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.keyboard-key.normal {
+  aspect-ratio: 0.7;
+}
+
+.keyboard-key.wide {
+  background-color: var(--lgrey);
+  width: calc(var(--keyboard-key-base-width) * 1.5);
 }
 
 .keyboard-key.unused {
@@ -231,26 +246,21 @@ header {
   background-color: var(--yellow);
 }
 
-.keyboard-key.wide {
-  background-color: var(--lgrey);
-  width: 6rem;
-}
-
 /* Typography */
 
 .keyboard-key p {
   color: white;
-  font-size: 1.7rem;
+  font-size: 1.2rem;
   font-weight: bold;
   margin: 10px;
 }
 
 .keyboard-key.enter p {
-  font-size: 1rem;
+  font-size: 0.8rem;
 }
 
-.keyboard-key.enter p {
-  font-size: 1rem;
+.keyboard-key.backspace p {
+  font-size: 1.5rem;
 }
 
 /* Debugging */
