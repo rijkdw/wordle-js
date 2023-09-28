@@ -7,6 +7,7 @@ import {
   keyIsColor,
   tileIsColor,
   typePhysicalLetter,
+  waitForFlipAnimationToFinish,
 } from "./test-helpers";
 
 describe("Input", () => {
@@ -215,24 +216,28 @@ describe("Tile colors change", () => {
     cy.visit("http://localhost:8000?word=WHISK");
 
     inputGuessAndHitEnter("HELLO", "physically");
+    waitForFlipAnimationToFinish();
     expectedColors = ["yellow", "grey", "grey", "grey", "grey"];
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(0, letterIndex), color));
     });
 
     inputGuessAndHitEnter("WORLD", "physically");
+    waitForFlipAnimationToFinish();
     expectedColors = ["green", "grey", "grey", "grey", "grey"];
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(1, letterIndex), color));
     });
 
     inputGuessAndHitEnter("WHISH", "physically");
+    waitForFlipAnimationToFinish();
     expectedColors = ["green", "green", "green", "green", "grey"];
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(2, letterIndex), color));
     });
 
     inputGuessAndHitEnter("WHISK", "physically");
+    waitForFlipAnimationToFinish();
     expectedColors = ["green", "green", "green", "green", "green"];
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(3, letterIndex), color));
@@ -276,6 +281,7 @@ describe("Robustness", () => {
     cy.visit("http://localhost:8000?word=HELLO");
 
     inputGuessAndHitEnter("MAGIC", "physically");
+    waitForFlipAnimationToFinish();
     expect(getTile(0, 0).should("contain", "M"));
     expect(getTile(0, 1).should("contain", "A"));
     expect(getTile(0, 2).should("contain", "G"));
@@ -287,6 +293,8 @@ describe("Robustness", () => {
 
     typePhysicalLetter("BACKSPACE");
     inputGuessAndHitEnter("HELLO", "physically");
+    waitForFlipAnimationToFinish();
+
     expect(getTile(1, 0).should("contain", "H"));
     expect(getTile(1, 1).should("contain", "E"));
     expect(getTile(1, 2).should("contain", "L"));

@@ -1,3 +1,9 @@
+const DURATION_WAIT_AFTER_ENTER = 1500;
+
+export function waitForFlipAnimationToFinish() {
+  cy.wait(DURATION_WAIT_AFTER_ENTER);
+}
+
 // The virtual keyboard
 
 export function getVirtualKey(key: string) {
