@@ -1,7 +1,12 @@
 const DURATION_WAIT_FOR_FLIP = 1500;
+const DURATION_WAIT_FOR_TOOLTIP = 1000;
 
 export function waitForFlipAnimationToFinish() {
   cy.wait(DURATION_WAIT_FOR_FLIP);
+}
+
+export function waitForTooltipToBePresent() {
+
 }
 
 // The virtual keyboard

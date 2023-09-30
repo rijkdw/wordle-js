@@ -490,7 +490,7 @@ class Controller {
             if (!this.model.mayCurrentInputBeAccepted() && !this.model.hasWon()) {
                 this.view.shake(SHAKE_DURATION);
                 this.lock(SHAKE_DURATION);
-                if (this.model.currentInputIsKnown()) {
+                if (!this.model.currentInputIsKnown()) {
                     this.view.showTooltip(UNKNOWN_WORD_MESSAGE);
                 }
                 if (this.model.currentInputNotFull()) {

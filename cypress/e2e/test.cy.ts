@@ -356,7 +356,7 @@ describe("Tooltip", () => {
     expect(getTooltip().should("not.exist"));
 
     inputGuessAndHitEnter("ABCDE", "physically");
-    expect(getTooltip().should("contain", "NOT IN WORD LIST"));
+    expect(getTooltip().should("contain", "Not in word list"));
   });
 
   it("shows for too-short word", () => {
@@ -367,7 +367,7 @@ describe("Tooltip", () => {
     expect(getTooltip().should("not.exist"));
 
     inputGuessAndHitEnter("ABCD", "physically");
-    expect(getTooltip().should("contain", "NOT ENOUGH LETTERS"));
+    expect(getTooltip().should("contain", "Not enough letters"));
   });
 
   it("shows correct message for winning", () => {
@@ -375,6 +375,6 @@ describe("Tooltip", () => {
 
     inputGuessAndHitEnter("HELLO", "physically");
     waitForFlipAnimationToFinish();
-    expect(getTooltip().should("contain", "GENIUS"));
+    expect(getTooltip().should("contain", "Genius"));
   });
 });
