@@ -2,6 +2,7 @@ import {
   clickVirtualKey,
   expectUiIsIntact,
   getTile,
+  getTooltip,
   getVirtualKey,
   inputGuessAndHitEnter,
   keyIsColor,
@@ -323,5 +324,57 @@ describe("Word selection via URL", () => {
     [0, 1, 2, 3, 4].forEach((letterIndex) => {
       expect(tileIsColor(getTile(0, letterIndex), "green"));
     });
+  });
+});
+
+describe("Tooltip", () => {
+  it("does not show for no reason", () => {
+    cy.visit("http://localhost:8000");
+
+    inputGuessAndHitEnter("MAGIC", "physically");
+    waitForFlipAnimationToFinish();
+    expect(getTooltip().should("not.exist"));
+
+    inputGuessAndHitEnter("WORLD", "physically");
+    waitForFlipAnimationToFinish();
+    expect(getTooltip().should("not.exist"));
+
+    inputGuessAndHitEnter("SHINE", "physically");
+    waitForFlipAnimationToFinish();
+    expect(getTooltip().should("not.exist"));
+
+    inputGuessAndHitEnter("CHEEK", "physically");
+    waitForFlipAnimationToFinish();
+    expect(getTooltip().should("not.exist"));
+  });
+
+  it("shows for unknown word", () => {
+    cy.visit("http://localhost:8000");
+
+    inputGuessAndHitEnter("SHINE", "physically");
+    waitForFlipAnimationToFinish();
+    expect(getTooltip().should("not.exist"));
+
+    inputGuessAndHitEnter("ABCDE", "physically");
+    expect(getTooltip().should("contain", "NOT IN WORD LIST"));
+  });
+
+  it("shows for too-short word", () => {
+    cy.visit("http://localhost:8000");
+
+    inputGuessAndHitEnter("SHINE", "physically");
+    waitForFlipAnimationToFinish();
+    expect(getTooltip().should("not.exist"));
+
+    inputGuessAndHitEnter("ABCD", "physically");
+    expect(getTooltip().should("contain", "NOT ENOUGH LETTERS"));
+  });
+
+  it("shows correct message for winning", () => {
+    cy.visit("http://localhost:8000");
+
+    inputGuessAndHitEnter("HELLO", "physically");
+    waitForFlipAnimationToFinish();
+    expect(getTooltip().should("contain", "GENIUS"));
   });
 });

@@ -1,7 +1,7 @@
-const DURATION_WAIT_AFTER_ENTER = 1500;
+const DURATION_WAIT_FOR_FLIP = 1500;
 
 export function waitForFlipAnimationToFinish() {
-  cy.wait(DURATION_WAIT_AFTER_ENTER);
+  cy.wait(DURATION_WAIT_FOR_FLIP);
 }
 
 // The virtual keyboard
@@ -73,4 +73,10 @@ function expectAllTilesExist() {
       expect(tile.should("exist"));
     }
   }
+}
+
+// The tooltip
+
+export function getTooltip() {
+  return cy.get("div.tooltip");
 }
