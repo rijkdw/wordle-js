@@ -14,6 +14,19 @@ const FLIPPING_DURATION = 200;
 const FLIPPING_INTERVAL = 250;
 const BOUNCE_DURATION = 800;
 const BOUNCE_INTERVAL = 250;
+const TOOLTIP_FADE_DURATION = 500;
+const TOOLTIP_SHOW_DURATION = 1500;
+const UNKNOWN_WORD_MESSAGE = "Not in word list";
+const NOT_ENOUGH_LETTERS_MESSAGE = "Not enough letters";
+const WIN_MESSAGES = [
+    "Genius",
+    "Nice",
+    "Nice",
+    "Nice",
+    "Nice",
+    "Phew",
+];
+const CLOSE_CALL_MESSAGE = "Phew";
 class Model {
     constructor(correctWord, legalWords) {
         this.correctWord = correctWord;
@@ -32,9 +45,11 @@ class Model {
     bindModelChanged(callback) {
         this.onModelChanged = callback;
     }
+    currentInputIsKnown() {
+        return this.legalWords.includes(this.currentInput);
+    }
     mayCurrentInputBeAccepted() {
-        return (this.currentInput.length === 5 &&
-            this.legalWords.includes(this.currentInput));
+        return this.currentInputIsFull() && this.currentInputIsKnown();
     }
     currentInputNotFull() {
         return this.currentInput.length < 5;
@@ -183,6 +198,7 @@ class View {
     constructor() {
         this.tileGridRoot = document.querySelector("div#tilegrid");
         this.keyboardRoot = document.querySelector("div#keyboard");
+        this.tooltipAnchor = document.querySelector("div#tooltip-anchor");
     }
     bindKeyPressOnPhysicalKeyboard(callback) {
         document.addEventListener("keydown", (event) => {
@@ -362,6 +378,28 @@ class View {
             setTimeout(effect, BOUNCE_INTERVAL * i);
         });
     }
+    showTooltip(message) {
+        document.querySelectorAll("div.tooltip").forEach((tooltip) => {
+            tooltip.remove();
+        });
+        const tooltip = document.createElement("div");
+        tooltip.classList.add("tooltip");
+        tooltip.classList.add("fade-in");
+        const p = document.createElement("p");
+        p.textContent = message;
+        tooltip.appendChild(p);
+        this.tooltipAnchor.appendChild(tooltip);
+        setTimeout(() => {
+            tooltip.classList.remove("fade-in");
+            tooltip.classList.add("fade-out");
+        }, TOOLTIP_FADE_DURATION + TOOLTIP_SHOW_DURATION);
+        setTimeout(() => {
+            try {
+                this.tooltipAnchor.removeChild(tooltip);
+            }
+            catch (e) { }
+        }, TOOLTIP_FADE_DURATION * 2 + TOOLTIP_SHOW_DURATION);
+    }
 }
 const KEYBOARD_LAYOUT_TEMPLATE = [
     "QWERTYUIOP".split(""),
@@ -452,6 +490,12 @@ class Controller {
             if (!this.model.mayCurrentInputBeAccepted() && !this.model.hasWon()) {
                 this.view.shake(SHAKE_DURATION);
                 this.lock(SHAKE_DURATION);
+                if (this.model.currentInputIsKnown()) {
+                    this.view.showTooltip(UNKNOWN_WORD_MESSAGE);
+                }
+                if (this.model.currentInputNotFull()) {
+                    this.view.showTooltip(NOT_ENOUGH_LETTERS_MESSAGE);
+                }
                 return;
             }
             this.view.flipCurrentInputAndApplyColors(this.model.getCurrentInputAsGuess());
@@ -459,6 +503,10 @@ class Controller {
                 this.model.acceptCurrentInput();
                 if (this.model.hasWon()) {
                     this.view.bounceLastGuess();
+                    this.view.showTooltip(WIN_MESSAGES[this.model.guessHistory.length - 1]);
+                }
+                if (this.model.hasLost()) {
+                    this.view.showTooltip(this.model.correctWord);
                 }
             }, FLIPPING_INTERVAL * 4 + FLIPPING_DURATION * 2);
         };
