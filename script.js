@@ -362,9 +362,6 @@ class View {
             setTimeout(effect, BOUNCE_INTERVAL * i);
         });
     }
-    getTile(guessIndex, letterIndex) {
-        return document.getElementById(`tile-${guessIndex}-${letterIndex}`);
-    }
 }
 const KEYBOARD_LAYOUT_TEMPLATE = [
     "QWERTYUIOP".split(""),
@@ -461,7 +458,6 @@ class Controller {
             setTimeout(() => {
                 this.model.acceptCurrentInput();
                 if (this.model.hasWon()) {
-                    console.log("WON!");
                     this.view.bounceLastGuess();
                 }
             }, FLIPPING_INTERVAL * 4 + FLIPPING_DURATION * 2);

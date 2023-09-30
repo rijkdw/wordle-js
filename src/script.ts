@@ -498,10 +498,6 @@ class View {
       setTimeout(effect, BOUNCE_INTERVAL * i);
     });
   }
-
-  getTile(guessIndex: number, letterIndex: number) {
-    return document.getElementById(`tile-${guessIndex}-${letterIndex}`);
-  }
 }
 
 // -----------------------------------------------------------------------
@@ -630,7 +626,6 @@ class Controller {
     setTimeout(() => {
       this.model.acceptCurrentInput();
       if (this.model.hasWon()) {
-        console.log("WON!");
         this.view.bounceLastGuess();
       }
     }, FLIPPING_INTERVAL * 4 + FLIPPING_DURATION * 2);
