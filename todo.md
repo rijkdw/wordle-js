@@ -1,12 +1,4 @@
 # Things to do
 
-- header
-- keyboard layout
-- keyboard tile padding
-- keyboard backspace character
-- animations
-  - correct input flipping
-  - incorrect input shake
-- tooltips
-  - show word after six guesses
-  - already guessed
+- Prohibit re-guessing past words (because why would you do that to yourself)
+- Back button to navigate to my portfolio home screen ([`rijkdewet.co.za`](rijkdewet.co.za))
