@@ -12,7 +12,7 @@ npm run start
 
 and then access on `http://localhost:8000`. Will run `tsc` to prepare.
 
-Test with
+While it's running, test with
 
 ```
 npm run e2e

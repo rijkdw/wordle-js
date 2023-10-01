@@ -1,4 +1,3 @@
-import { type } from "cypress/types/jquery";
 import {
   clickVirtualKey,
   expectUiIsIntact,
@@ -9,12 +8,13 @@ import {
   keyIsColor,
   tileIsColor,
   typePhysicalLetter,
+  visitPage,
   waitForFlipAnimationToFinish,
 } from "./test-helpers";
 
 describe("Input", () => {
   it("with virtual keyboard", () => {
-    cy.visit("http://localhost:8000?word=WHISK");
+    visitPage({ word: "WHISK" });
 
     clickVirtualKey("H");
     clickVirtualKey("E");
@@ -33,7 +33,7 @@ describe("Input", () => {
   });
 
   it("with physical keyboard", () => {
-    cy.visit("http://localhost:8000?word=WHISK");
+    visitPage({ word: "WHISK" });
 
     typePhysicalLetter("H");
     typePhysicalLetter("E");
@@ -52,7 +52,7 @@ describe("Input", () => {
   });
 
   const naturalTypingSubroutine = (inputFunction: (key: string) => void) => {
-    cy.visit("http://localhost:8000");
+    visitPage({});
 
     inputFunction("H"); // H
     expect(getTile(0, 0).contains("H"));
@@ -104,8 +104,8 @@ describe("Input", () => {
 
 describe("Keyboard colors change", () => {
   it("for one guess", () => {
-    cy.visit("http://localhost:8000?word=WHISK");
-    inputGuessAndHitEnter("HELLO", "physically");
+    visitPage({ word: "WHISK" });
+    inputGuessAndHitEnter("HELLO");
     expect(getVirtualKey("W").should("have.class", "unused"));
     expect(getVirtualKey("H").should("have.class", "yellow"));
     expect(getVirtualKey("I").should("have.class", "unused"));
@@ -123,9 +123,9 @@ describe("Keyboard colors change", () => {
 
   it("for multiple guesses", () => {
     let keyStates: string[][] = [];
-    cy.visit("http://localhost:8000?word=WHISK");
+    visitPage({ word: "WHISK" });
 
-    inputGuessAndHitEnter("HELLO", "physically");
+    inputGuessAndHitEnter("HELLO");
     keyStates = [
       ["W", "unused"],
       ["H", "yellow"],
@@ -143,7 +143,7 @@ describe("Keyboard colors change", () => {
       expect(keyIsColor(key, state));
     });
 
-    inputGuessAndHitEnter("WORLD", "physically");
+    inputGuessAndHitEnter("WORLD");
     keyStates = [
       ["W", "green"],
       ["H", "yellow"],
@@ -161,7 +161,7 @@ describe("Keyboard colors change", () => {
       expect(keyIsColor(key, state));
     });
 
-    inputGuessAndHitEnter("WHISH", "physically");
+    inputGuessAndHitEnter("WHISH");
     keyStates = [
       ["W", "green"],
       ["H", "green"],
@@ -179,7 +179,7 @@ describe("Keyboard colors change", () => {
       expect(keyIsColor(key, state));
     });
 
-    inputGuessAndHitEnter("WHISK", "physically");
+    inputGuessAndHitEnter("WHISK");
     keyStates = [
       ["W", "green"],
       ["H", "green"],
@@ -203,8 +203,8 @@ describe("Keyboard colors change", () => {
 
 describe("Tile colors change", () => {
   it("for one guess", () => {
-    cy.visit("http://localhost:8000?word=WHISK");
-    inputGuessAndHitEnter("HELLO", "physically");
+    visitPage({ word: "WHISK" });
+    inputGuessAndHitEnter("HELLO");
     let expectedColors = ["yellow", "grey", "grey", "grey", "grey"];
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(0, letterIndex), color));
@@ -215,30 +215,30 @@ describe("Tile colors change", () => {
 
   it("for multiple guesses", () => {
     let expectedColors: string[];
-    cy.visit("http://localhost:8000?word=WHISK");
+    visitPage({ word: "WHISK" });
 
-    inputGuessAndHitEnter("HELLO", "physically");
+    inputGuessAndHitEnter("HELLO");
     waitForFlipAnimationToFinish();
     expectedColors = ["yellow", "grey", "grey", "grey", "grey"];
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(0, letterIndex), color));
     });
 
-    inputGuessAndHitEnter("WORLD", "physically");
+    inputGuessAndHitEnter("WORLD");
     waitForFlipAnimationToFinish();
     expectedColors = ["green", "grey", "grey", "grey", "grey"];
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(1, letterIndex), color));
     });
 
-    inputGuessAndHitEnter("WHISH", "physically");
+    inputGuessAndHitEnter("WHISH");
     waitForFlipAnimationToFinish();
     expectedColors = ["green", "green", "green", "green", "grey"];
     expectedColors.forEach((color, letterIndex) => {
       expect(tileIsColor(getTile(2, letterIndex), color));
     });
 
-    inputGuessAndHitEnter("WHISK", "physically");
+    inputGuessAndHitEnter("WHISK");
     waitForFlipAnimationToFinish();
     expectedColors = ["green", "green", "green", "green", "green"];
     expectedColors.forEach((color, letterIndex) => {
@@ -249,7 +249,7 @@ describe("Tile colors change", () => {
   });
 
   it("for incomplete inputs", () => {
-    cy.visit("http://localhost:8000");
+    visitPage({});
     typePhysicalLetter("A");
     typePhysicalLetter("B");
     typePhysicalLetter("C");
@@ -265,7 +265,7 @@ describe("Tile colors change", () => {
 
 describe("Robustness", () => {
   it("does not enter >5 letters", () => {
-    cy.visit("http://localhost:8000?word=XXXXX");
+    visitPage({ word: "XXXXX" });
     inputGuessAndHitEnter("HELLOWORLD", "physically");
     "HELLO".split("").forEach((letter, letterIndex) => {
       expect(getTile(0, letterIndex).should("contain", letter));
@@ -280,9 +280,9 @@ describe("Robustness", () => {
   });
 
   it("does not allow more input after winning", () => {
-    cy.visit("http://localhost:8000?word=HELLO");
+    visitPage({ word: "HELLO" });
 
-    inputGuessAndHitEnter("MAGIC", "physically");
+    inputGuessAndHitEnter("MAGIC");
     waitForFlipAnimationToFinish();
     expect(getTile(0, 0).should("contain", "M"));
     expect(getTile(0, 1).should("contain", "A"));
@@ -294,7 +294,7 @@ describe("Robustness", () => {
     expect(getTile(1, 0).should("contain", "X"));
 
     typePhysicalLetter("BACKSPACE");
-    inputGuessAndHitEnter("HELLO", "physically");
+    inputGuessAndHitEnter("HELLO");
     waitForFlipAnimationToFinish();
 
     expect(getTile(1, 0).should("contain", "H"));
@@ -310,9 +310,9 @@ describe("Robustness", () => {
   });
 
   it('cannot "resubmit" after winning', () => {
-    cy.visit("http://localhost:8000?word=HELLO");
+    visitPage({ word: "HELLO" });
 
-    inputGuessAndHitEnter("HELLO", "physically");
+    inputGuessAndHitEnter("HELLO");
     waitForFlipAnimationToFinish();
     expect(getTooltip().should("exist"));
 
@@ -324,13 +324,13 @@ describe("Robustness", () => {
   });
 
   it("cannot guess same word twice", () => {
-    cy.visit("http://localhost:8000?word=HELLO");
+    visitPage({ word: "HELLO" });
 
-    inputGuessAndHitEnter("WORLD", "physically");
+    inputGuessAndHitEnter("WORLD");
     expect(getTooltip().should("not.exist"));
     waitForFlipAnimationToFinish();
 
-    inputGuessAndHitEnter("WORLD", "physically");
+    inputGuessAndHitEnter("WORLD");
     expect(getTooltip().should("exist"));
     expect(getTooltip().should("contain", "Already guessed"));
 
@@ -340,30 +340,30 @@ describe("Robustness", () => {
 
 describe("Word selection via URL", () => {
   it("defaults to HELLO", () => {
-    cy.visit("http://localhost:8000");
-    inputGuessAndHitEnter("HELLO", "physically");
+    visitPage({});
+    inputGuessAndHitEnter("HELLO");
     [0, 1, 2, 3, 4].forEach((letterIndex) => {
       expect(tileIsColor(getTile(0, letterIndex), "green"));
     });
   });
 
   it("can be set", () => {
-    cy.visit("http://localhost:8000?word=WORLD");
-    inputGuessAndHitEnter("WORLD", "physically");
+    visitPage({ word: "WORLD" });
+    inputGuessAndHitEnter("WORLD");
     [0, 1, 2, 3, 4].forEach((letterIndex) => {
       expect(tileIsColor(getTile(0, letterIndex), "green"));
     });
   });
 
   it("is case insensitive", () => {
-    cy.visit("http://localhost:8000?word=WORLD");
-    inputGuessAndHitEnter("WORLD", "physically");
+    visitPage({ word: "WORLD" });
+    inputGuessAndHitEnter("WORLD");
     [0, 1, 2, 3, 4].forEach((letterIndex) => {
       expect(tileIsColor(getTile(0, letterIndex), "green"));
     });
 
-    cy.visit("http://localhost:8000?word=world");
-    inputGuessAndHitEnter("WORLD", "physically");
+    visitPage({ word: "world" });
+    inputGuessAndHitEnter("WORLD");
     [0, 1, 2, 3, 4].forEach((letterIndex) => {
       expect(tileIsColor(getTile(0, letterIndex), "green"));
     });
@@ -372,51 +372,51 @@ describe("Word selection via URL", () => {
 
 describe("Tooltip", () => {
   it("does not show for no reason", () => {
-    cy.visit("http://localhost:8000?word=HELLO");
+    visitPage({ word: "HELLO" });
 
-    inputGuessAndHitEnter("MAGIC", "physically");
+    inputGuessAndHitEnter("MAGIC");
     waitForFlipAnimationToFinish();
     expect(getTooltip().should("not.exist"));
 
-    inputGuessAndHitEnter("WORLD", "physically");
+    inputGuessAndHitEnter("WORLD");
     waitForFlipAnimationToFinish();
     expect(getTooltip().should("not.exist"));
 
-    inputGuessAndHitEnter("SHINE", "physically");
+    inputGuessAndHitEnter("SHINE");
     waitForFlipAnimationToFinish();
     expect(getTooltip().should("not.exist"));
 
-    inputGuessAndHitEnter("CHEEK", "physically");
+    inputGuessAndHitEnter("CHEEK");
     waitForFlipAnimationToFinish();
     expect(getTooltip().should("not.exist"));
   });
 
-  it("shows for unknown word", () => {
-    cy.visit("http://localhost:8000?word=HELLO");
+  it("shows for unknown words", () => {
+    visitPage({ word: "HELLO" });
 
-    inputGuessAndHitEnter("SHINE", "physically");
+    inputGuessAndHitEnter("SHINE");
     waitForFlipAnimationToFinish();
     expect(getTooltip().should("not.exist"));
 
-    inputGuessAndHitEnter("ABCDE", "physically");
+    inputGuessAndHitEnter("ABCDE");
     expect(getTooltip().should("contain", "Not in word list"));
   });
 
-  it("shows for too-short word", () => {
-    cy.visit("http://localhost:8000?word=HELLO");
+  it("shows for too-short words", () => {
+    visitPage({ word: "HELLO" });
 
-    inputGuessAndHitEnter("SHINE", "physically");
+    inputGuessAndHitEnter("SHINE");
     waitForFlipAnimationToFinish();
     expect(getTooltip().should("not.exist"));
 
-    inputGuessAndHitEnter("ABCD", "physically");
+    inputGuessAndHitEnter("ABCD");
     expect(getTooltip().should("contain", "Not enough letters"));
   });
 
   it("shows correct message for winning", () => {
-    cy.visit("http://localhost:8000?word=HELLO");
+    visitPage({ word: "HELLO" });
 
-    inputGuessAndHitEnter("HELLO", "physically");
+    inputGuessAndHitEnter("HELLO");
     waitForFlipAnimationToFinish();
     expect(getTooltip().should("contain", "Genius"));
   });

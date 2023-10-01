@@ -1,13 +1,25 @@
 const DURATION_WAIT_FOR_FLIP = 1500;
 const DURATION_WAIT_FOR_TOOLTIP = 1000;
 
+type visitPageParams = {
+  word?: string;
+};
+export function visitPage({ word }: visitPageParams) {
+  const searchParams = [];
+  if (word !== undefined) {
+    searchParams.push(`word=${word}`);
+  }
+  const url =
+    "http://localhost:8000" +
+    (searchParams.length > 0 ? "?" + searchParams.join("&") : "");
+  cy.visit(url);
+}
+
 export function waitForFlipAnimationToFinish() {
   cy.wait(DURATION_WAIT_FOR_FLIP);
 }
 
-export function waitForTooltipToBePresent() {
-
-}
+export function waitForTooltipToBePresent() {}
 
 // The virtual keyboard
 
@@ -39,9 +51,9 @@ export function typePhysicalLetter(key: string) {
 
 export function inputGuessAndHitEnter(
   input: string,
-  method: "virtually" | "physically"
+  method?: "virtually" | "physically"
 ) {
-  if (method === "physically") {
+  if (method === "physically" || method === undefined) {
     input.split("").forEach((letter) => {
       typePhysicalLetter(letter);
     });
