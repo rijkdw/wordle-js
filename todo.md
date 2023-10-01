@@ -9,6 +9,3 @@
   - types
 
 # Issues to fix
-
-- Can "enter" words after the board is full
-- Force uppercase for word selection via URL
