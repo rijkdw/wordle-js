@@ -82,7 +82,7 @@ class Model {
         return this.hasReachedGuessLimit() && !this.lastGuessMatchesCorrectWord();
     }
     isGameOver() {
-        return this.hasReachedGuessLimit();
+        return this.hasWon() || this.hasLost();
     }
     getCurrentInputAsGuess() {
         return performWordleComparison(this.currentInput, this.correctWord);
@@ -448,6 +448,9 @@ class Controller {
             if (this.isLocked) {
                 return;
             }
+            if (this.model.isGameOver()) {
+                return;
+            }
             if (letter === "ENTER") {
                 this.handleSubmit();
             }
@@ -459,9 +462,6 @@ class Controller {
             }
         };
         this.handleAddLetter = (letter) => {
-            if (this.isLocked) {
-                return;
-            }
             if (this.model.currentInputIsFull()) {
                 return;
             }
@@ -475,18 +475,12 @@ class Controller {
             this.view.popLastTile();
         };
         this.handleDeleteLetter = () => {
-            if (this.isLocked) {
-                return;
-            }
             if (this.model.currentInputIsEmpty()) {
                 return;
             }
             this.model.deleteLetter();
         };
         this.handleSubmit = () => {
-            if (this.isLocked) {
-                return;
-            }
             if (!this.model.mayCurrentInputBeAccepted() && !this.model.hasWon()) {
                 this.view.shake(SHAKE_DURATION);
                 this.lock(SHAKE_DURATION);

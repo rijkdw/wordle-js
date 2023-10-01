@@ -9,5 +9,5 @@
 
 # Issues to fix
 
-- Can "resubmit" a winning word to replay the animation
 - Can "enter" words after the board is full
+- Force uppercase for word selection via URL
