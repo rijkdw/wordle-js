@@ -322,6 +322,20 @@ describe("Robustness", () => {
 
     expectUiIsIntact();
   });
+
+  it("cannot guess same word twice", () => {
+    cy.visit("http://localhost:8000?word=HELLO");
+
+    inputGuessAndHitEnter("WORLD", "physically");
+    expect(getTooltip().should("not.exist"));
+    waitForFlipAnimationToFinish();
+
+    inputGuessAndHitEnter("WORLD", "physically");
+    expect(getTooltip().should("exist"));
+    expect(getTooltip().should("contain", "Already guessed"));
+
+    expectUiIsIntact();
+  });
 });
 
 describe("Word selection via URL", () => {

@@ -74,6 +74,7 @@ const WIN_MESSAGES = [
   "Phew",
 ];
 const CLOSE_CALL_MESSAGE = "Phew";
+const ALREADY_GUESSED_MESSAGE = "Already guessed";
 
 // =======================================================================
 // Model
@@ -113,12 +114,24 @@ class Model {
 
   // derived data
 
+  currentInputHasAlreadyBeenGuessed() {
+    return this.getPastGuessesAsStrings().includes(this.currentInput);
+  }
+
+  currentInputHasNotYetBeenGuessed() {
+    return !this.currentInputHasAlreadyBeenGuessed();
+  }
+
   currentInputIsKnown() {
     return this.legalWords.includes(this.currentInput);
   }
 
   mayCurrentInputBeAccepted() {
-    return this.currentInputIsFull() && this.currentInputIsKnown();
+    return (
+      this.currentInputIsFull() &&
+      this.currentInputIsKnown() &&
+      this.currentInputHasNotYetBeenGuessed()
+    );
   }
 
   currentInputNotFull() {
@@ -179,6 +192,12 @@ class Model {
     return this.guessHistory[this.guessHistory.length - 1]
       .map((x) => x.letter)
       .join("");
+  }
+
+  getPastGuessesAsStrings(): string[] {
+    return this.guessHistory.map((guess) =>
+      guess.map((letter) => letter.letter).join("")
+    );
   }
 
   // modify self
@@ -658,6 +677,9 @@ class Controller {
       }
       if (this.model.currentInputNotFull()) {
         this.view.showTooltip(NOT_ENOUGH_LETTERS_MESSAGE);
+      }
+      if (this.model.currentInputHasAlreadyBeenGuessed()) {
+        this.view.showTooltip(ALREADY_GUESSED_MESSAGE);
       }
       return;
     }
