@@ -4,9 +4,10 @@
   "description": "",
   "main": "script.js",
   "scripts": {
-    "start": "tsc && python -m http.server 8000",
-    "e2e": "tsc && cypress run --browser electron",
-    "e2e-all": "tsc && for browser in chrome electron firefox; do echo \"Testing $browser\"; cypress run --browser $browser; done"
+    "build": "webpack",
+    "start": "npm run build && python -m http.server 8000",
+    "e2e": "npm run build && cypress run --browser electron",
+    "e2e-all": "npm run build && for browser in chrome electron firefox; do echo \"Testing $browser\"; cypress run --browser $browser; done"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +18,9 @@
     "@types/cypress": "^1.1.3",
     "cypress": "^13.2.0",
     "nodemon": "^3.0.1",
-    "typescript": "^5.2.2"
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.2.2",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
   }
 }
