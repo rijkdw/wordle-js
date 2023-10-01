@@ -35,9 +35,6 @@ export class Controller {
     if (this.isLocked) {
       return;
     }
-    if (this.model.isGameOver()) {
-      return;
-    }
     if (letter === "ENTER") {
       this.handleSubmit();
     } else if (letter === "BACKSPACE") {
@@ -83,6 +80,7 @@ export class Controller {
       }
       return;
     }
+    this.lock();
     this.view.flipCurrentInputAndApplyColors(
       this.model.getCurrentInputAsGuess()
     );
@@ -91,17 +89,24 @@ export class Controller {
       if (this.model.hasWon()) {
         this.view.bounceLastGuess();
         this.view.showTooltip(WIN_MESSAGES[this.model.guessHistory.length - 1]);
-      }
-      if (this.model.hasLost()) {
+      } else if (this.model.hasLost()) {
         this.view.showTooltip(this.model.correctWord);
+      } else {
+        this.unlock();
       }
     }, FLIPPING_INTERVAL * 4 + FLIPPING_DURATION * 2);
   };
 
-  lock(durationInMs: number) {
+  lock(durationInMs?: number) {
     this.isLocked = true;
-    setTimeout(() => {
-      this.isLocked = false;
-    }, durationInMs);
+    if (durationInMs !== undefined) {
+      setTimeout(() => {
+        this.unlock();
+      }, durationInMs);
+    }
+  }
+
+  unlock() {
+    this.isLocked = false;
   }
 }

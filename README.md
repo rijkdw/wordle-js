@@ -4,21 +4,25 @@ A [Wordle](https://www.nytimes.com/games/wordle/index.html) clone built with Typ
 
 ## Running, testing, etc
 
+Build with
+
+```
+npm run build
+```
+
 Run with
 
 ```
 npm run start
 ```
 
-and then access on `http://localhost:8000`. Will run `tsc` to prepare.
+and then access on `http://localhost:8000`.
 
 While it's running, test with
 
 ```
 npm run e2e
 ```
-
-which will also run `tsc` beforehand.
 
 ## Disclaimer
 
