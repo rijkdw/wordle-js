@@ -6,6 +6,7 @@
   - one for each MVC component
   - utils
   - constants
+  - types
 
 # Issues to fix
 
