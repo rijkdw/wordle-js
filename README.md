@@ -1,6 +1,6 @@
 # Wordle-js
 
-A [Wordle](https://www.nytimes.com/games/wordle/index.html) clone built with Typescript and without any frameworks. Can be played at my home page, [`rijkdewet.co.za`](rijkdewet.co.za/wordle) (soon).
+A [Wordle](https://www.nytimes.com/games/wordle/index.html) clone built with Typescript and without any frameworks. Can be played at my home page, [`rijkdewet.co.za`](http://www.rijkdewet.co.za/wordle).
 
 ## Disclaimer
 
