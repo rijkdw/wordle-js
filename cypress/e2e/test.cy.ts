@@ -354,6 +354,20 @@ describe("Word selection via URL", () => {
       expect(tileIsColor(getTile(0, letterIndex), "green"));
     });
   });
+
+  it("is case insensitive", () => {
+    cy.visit("http://localhost:8000?word=WORLD");
+    inputGuessAndHitEnter("WORLD", "physically");
+    [0, 1, 2, 3, 4].forEach((letterIndex) => {
+      expect(tileIsColor(getTile(0, letterIndex), "green"));
+    });
+
+    cy.visit("http://localhost:8000?word=world");
+    inputGuessAndHitEnter("WORLD", "physically");
+    [0, 1, 2, 3, 4].forEach((letterIndex) => {
+      expect(tileIsColor(getTile(0, letterIndex), "green"));
+    });
+  });
 });
 
 describe("Tooltip", () => {
