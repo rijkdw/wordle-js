@@ -1,3 +1,4 @@
+import { type } from "cypress/types/jquery";
 import {
   clickVirtualKey,
   expectUiIsIntact,
@@ -307,6 +308,20 @@ describe("Robustness", () => {
 
     expectUiIsIntact();
   });
+
+  it('cannot "resubmit" after winning', () => {
+    cy.visit("http://localhost:8000?word=HELLO");
+
+    inputGuessAndHitEnter("HELLO", "physically");
+    waitForFlipAnimationToFinish();
+    expect(getTooltip().should("exist"));
+
+    typePhysicalLetter("ENTER");
+    waitForFlipAnimationToFinish();
+    expect(getTooltip().should("not.exist"));
+
+    expectUiIsIntact();
+  });
 });
 
 describe("Word selection via URL", () => {
@@ -329,7 +344,7 @@ describe("Word selection via URL", () => {
 
 describe("Tooltip", () => {
   it("does not show for no reason", () => {
-    cy.visit("http://localhost:8000");
+    cy.visit("http://localhost:8000?word=HELLO");
 
     inputGuessAndHitEnter("MAGIC", "physically");
     waitForFlipAnimationToFinish();
@@ -349,7 +364,7 @@ describe("Tooltip", () => {
   });
 
   it("shows for unknown word", () => {
-    cy.visit("http://localhost:8000");
+    cy.visit("http://localhost:8000?word=HELLO");
 
     inputGuessAndHitEnter("SHINE", "physically");
     waitForFlipAnimationToFinish();
@@ -360,7 +375,7 @@ describe("Tooltip", () => {
   });
 
   it("shows for too-short word", () => {
-    cy.visit("http://localhost:8000");
+    cy.visit("http://localhost:8000?word=HELLO");
 
     inputGuessAndHitEnter("SHINE", "physically");
     waitForFlipAnimationToFinish();
@@ -371,7 +386,7 @@ describe("Tooltip", () => {
   });
 
   it("shows correct message for winning", () => {
-    cy.visit("http://localhost:8000");
+    cy.visit("http://localhost:8000?word=HELLO");
 
     inputGuessAndHitEnter("HELLO", "physically");
     waitForFlipAnimationToFinish();

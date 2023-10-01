@@ -161,7 +161,7 @@ class Model {
   }
 
   isGameOver() {
-    return this.hasReachedGuessLimit();
+    return this.hasWon() || this.hasLost();
   }
 
   getCurrentInputAsGuess(): Guess {
@@ -616,6 +616,9 @@ class Controller {
     if (this.isLocked) {
       return;
     }
+    if (this.model.isGameOver()) {
+      return;
+    }
     if (letter === "ENTER") {
       this.handleSubmit();
     } else if (letter === "BACKSPACE") {
@@ -626,9 +629,6 @@ class Controller {
   };
 
   handleAddLetter = (letter: Letter) => {
-    if (this.isLocked) {
-      return;
-    }
     if (this.model.currentInputIsFull()) {
       return;
     }
@@ -643,9 +643,6 @@ class Controller {
   };
 
   handleDeleteLetter = () => {
-    if (this.isLocked) {
-      return;
-    }
     if (this.model.currentInputIsEmpty()) {
       return;
     }
@@ -653,9 +650,6 @@ class Controller {
   };
 
   handleSubmit = () => {
-    if (this.isLocked) {
-      return;
-    }
     if (!this.model.mayCurrentInputBeAccepted() && !this.model.hasWon()) {
       this.view.shake(SHAKE_DURATION);
       this.lock(SHAKE_DURATION);
