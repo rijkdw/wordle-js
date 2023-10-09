@@ -1,5 +1,4 @@
 // keep these in sync with CSS
-
 export const SHAKE_DURATION = 600;
 
 export const INPUTTING_DURATION = 100;

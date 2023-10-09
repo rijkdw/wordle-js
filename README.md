@@ -26,4 +26,4 @@ npm run e2e
 
 ## Disclaimer
 
-Wordle is the property of the NY Times and this project does not intend to make any claim otherwise.
+Wordle is the property of the NY Times and this toy project does not intend to make any claim otherwise.

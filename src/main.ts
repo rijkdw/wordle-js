@@ -1,5 +1,5 @@
-import { Model } from "./model";
 import { Controller } from "./controller";
+import { Model } from "./model";
 import { View } from "./view";
 
 function getWord() {
@@ -16,3 +16,4 @@ console.log(getWord());
 const model = new Model(getWord());
 const view = new View();
 const controller = new Controller(model, view);
+controller.init();

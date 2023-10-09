@@ -1,7 +1,3 @@
-// =======================================================================
-// View
-// =======================================================================
-
 import {
   BOUNCE_DURATION,
   BOUNCE_INTERVAL,
@@ -11,13 +7,13 @@ import {
   TOOLTIP_FADE_DURATION,
   TOOLTIP_SHOW_DURATION,
 } from "./constants";
-import { Model } from "./model";
 import { Guess, KeyboardKeyData, KeyboardKeyLetter, Letter } from "./types";
 import {
   createKeyboardLayout,
   letterDataToTileElement,
   letterToTileElement,
 } from "./viewutils";
+import { Model } from "./model";
 
 export class View {
   tileGridRoot: HTMLElement;
@@ -249,10 +245,15 @@ export class View {
       tooltip.classList.remove("fade-in");
       tooltip.classList.add("fade-out");
     }, TOOLTIP_FADE_DURATION + TOOLTIP_SHOW_DURATION);
-    setTimeout(() => {
-      try {
-        this.tooltipAnchor.removeChild(tooltip);
-      } catch (e) {}
-    }, TOOLTIP_FADE_DURATION * 2 + TOOLTIP_SHOW_DURATION);
+    setTimeout(
+      () => {
+        try {
+          this.tooltipAnchor.removeChild(tooltip);
+        } catch (e) {
+          //
+        }
+      },
+      TOOLTIP_FADE_DURATION * 2 + TOOLTIP_SHOW_DURATION
+    );
   }
 }

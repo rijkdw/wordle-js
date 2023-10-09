@@ -1,17 +1,10 @@
-// =======================================================================
-// Model
-// * stores state
-// * provides derivative data (e.g. number of guesses)
-// * modifies self
-// =======================================================================
-
+import { Guess, KeyboardStatusMap, Letter, LetterInGuessStatus } from "./types";
 import {
   chooseBetterLetterStatus,
   createKeyboardStatus,
   loadLegalWordsAsync,
   performWordleComparison,
 } from "./modelutils";
-import { Guess, KeyboardStatusMap, Letter, LetterInGuessStatus } from "./types";
 
 export class Model {
   correctWord: string;

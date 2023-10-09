@@ -7,8 +7,8 @@ import {
   UNKNOWN_WORD_MESSAGE,
   WIN_MESSAGES,
 } from "./constants";
-import { Model } from "./model";
 import { KeyboardKeyLetter, Letter } from "./types";
+import { Model } from "./model";
 import { View } from "./view";
 
 export class Controller {
@@ -18,12 +18,13 @@ export class Controller {
 
   constructor(model: Model, view: View) {
     this.model = model;
-    this.model.bindModelChanged(this.onModelChanged);
-
     this.view = view;
+  }
+
+  init() {
+    this.model.bindModelChanged(this.onModelChanged);
     this.view.bindClickVirtualKeyboard(this.handleKeypress);
     this.view.bindKeyPressOnPhysicalKeyboard(this.handleKeypress);
-
     this.onModelChanged(this.model);
   }
 
@@ -84,17 +85,22 @@ export class Controller {
     this.view.flipCurrentInputAndApplyColors(
       this.model.getCurrentInputAsGuess()
     );
-    setTimeout(() => {
-      this.model.acceptCurrentInput();
-      if (this.model.hasWon()) {
-        this.view.bounceLastGuess();
-        this.view.showTooltip(WIN_MESSAGES[this.model.guessHistory.length - 1]);
-      } else if (this.model.hasLost()) {
-        this.view.showTooltip(this.model.correctWord);
-      } else {
-        this.unlock();
-      }
-    }, FLIPPING_INTERVAL * 4 + FLIPPING_DURATION * 2);
+    setTimeout(
+      () => {
+        this.model.acceptCurrentInput();
+        if (this.model.hasWon()) {
+          this.view.bounceLastGuess();
+          this.view.showTooltip(
+            WIN_MESSAGES[this.model.guessHistory.length - 1]
+          );
+        } else if (this.model.hasLost()) {
+          this.view.showTooltip(this.model.correctWord);
+        } else {
+          this.unlock();
+        }
+      },
+      FLIPPING_INTERVAL * 4 + FLIPPING_DURATION * 2
+    );
   };
 
   lock(durationInMs?: number) {
